@@ -61,10 +61,10 @@
 </div>
 
 <!-- Charts and Recent Orders -->
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
     <!-- Sales Chart -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Grafik Penjualan</h3>
             <select class="text-sm border border-gray-300 rounded-md px-3 py-1">
                 <option>7 Hari Terakhir</option>
@@ -72,15 +72,19 @@
                 <option>3 Bulan Terakhir</option>
             </select>
         </div>
-        <canvas id="salesChart" height="300"></canvas>
+        <div class="relative" style="height: 300px;">
+            <canvas id="salesChart"></canvas>
+        </div>
     </div>
 
     <!-- Order Status Chart -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Status Pesanan</h3>
         </div>
-        <canvas id="orderStatusChart" height="300"></canvas>
+        <div class="relative" style="height: 300px;">
+            <canvas id="orderStatusChart"></canvas>
+        </div>
     </div>
 </div>
 
@@ -142,10 +146,7 @@
 <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <a href="/monitoring" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
-            <i class="fas fa-chart-line text-blue-600 text-2xl mb-2"></i>
-            <span class="text-sm font-medium text-gray-700">Monitoring</span>
-        </a>
+        
         <a href="/orders" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <i class="fas fa-plus-circle text-green-600 text-2xl mb-2"></i>
             <span class="text-sm font-medium text-gray-700">Pesanan Baru</span>
@@ -176,7 +177,13 @@ const salesChart = new Chart(salesCtx, {
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
-            fill: true
+            fill: true,
+            borderWidth: 3,
+            pointBackgroundColor: 'rgb(59, 130, 246)',
+            pointBorderColor: '#ffffff',
+            pointBorderWidth: 2,
+            pointRadius: 6,
+            pointHoverRadius: 8
         }]
     },
     options: {
@@ -185,17 +192,48 @@ const salesChart = new Chart(salesCtx, {
         plugins: {
             legend: {
                 display: false
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1,
+                cornerRadius: 8,
+                displayColors: false
             }
         },
         scales: {
+            x: {
+                grid: {
+                    display: false
+                },
+                ticks: {
+                    font: {
+                        size: 12
+                    },
+                    color: '#6b7280'
+                }
+            },
             y: {
                 beginAtZero: true,
+                grid: {
+                    color: 'rgba(0, 0, 0, 0.05)'
+                },
                 ticks: {
+                    font: {
+                        size: 12
+                    },
+                    color: '#6b7280',
                     callback: function(value) {
                         return 'Rp ' + value + 'M';
                     }
                 }
             }
+        },
+        interaction: {
+            intersect: false,
+            mode: 'index'
         }
     }
 });
@@ -213,7 +251,10 @@ const orderStatusChart = new Chart(statusCtx, {
                 'rgb(59, 130, 246)',
                 'rgb(251, 191, 36)',
                 'rgb(239, 68, 68)'
-            ]
+            ],
+            borderWidth: 0,
+            hoverBorderWidth: 2,
+            hoverBorderColor: '#ffffff'
         }]
     },
     options: {
@@ -221,10 +262,42 @@ const orderStatusChart = new Chart(statusCtx, {
         maintainAspectRatio: false,
         plugins: {
             legend: {
-                position: 'bottom'
+                position: 'bottom',
+                labels: {
+                    padding: 20,
+                    usePointStyle: true,
+                    font: {
+                        size: 12
+                    },
+                    color: '#374151'
+                }
+            },
+            tooltip: {
+                backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                titleColor: '#ffffff',
+                bodyColor: '#ffffff',
+                borderColor: 'rgb(59, 130, 246)',
+                borderWidth: 1,
+                cornerRadius: 8,
+                callbacks: {
+                    label: function(context) {
+                        const label = context.label || '';
+                        const value = context.parsed;
+                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                        const percentage = ((value / total) * 100).toFixed(1);
+                        return `${label}: ${value} (${percentage}%)`;
+                    }
+                }
             }
-        }
+        },
+        cutout: '60%'
     }
+});
+
+// Responsive chart resizing
+window.addEventListener('resize', function() {
+    salesChart.resize();
+    orderStatusChart.resize();
 });
 </script>
 @endsection

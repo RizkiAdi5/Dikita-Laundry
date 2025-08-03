@@ -36,10 +36,7 @@
                     <span>Dashboard</span>
                 </a>
                 
-                <a href="/monitoring" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('monitoring*') ? 'bg-blue-50 text-blue-600' : '' }}">
-                    <i class="fas fa-chart-line w-5 h-5 mr-3"></i>
-                    <span>Monitoring</span>
-                </a>
+                
                 
                 <a href="/orders" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('orders*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-shopping-cart w-5 h-5 mr-3"></i>

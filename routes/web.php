@@ -37,10 +37,6 @@ Route::get('/employees', function () {
     return view('employees');
 });
 
-Route::get('/monitoring', function () {
-    return view('monitoring');
-});
-
 Route::get('/reports', function () {
     return view('reports');
 });
