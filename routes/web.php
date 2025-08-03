@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\CustomerController;
 
 /*
 |--------------------------------------------------------------------------
@@ -21,9 +22,18 @@ Route::get('/orders', function () {
     return view('orders');
 });
 
-Route::get('/customers', function () {
-    return view('customers');
-});
+// Customer routes - Perbaiki urutan untuk menghindari konflik routing
+Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');
+Route::get('/customers/create', [CustomerController::class, 'create'])->name('customers.create');
+Route::post('/customers', [CustomerController::class, 'store'])->name('customers.store');
+Route::get('/customers/{customer}/edit', [CustomerController::class, 'edit'])->name('customers.edit');
+Route::put('/customers/{customer}', [CustomerController::class, 'update'])->name('customers.update');
+Route::delete('/customers/{customer}', [CustomerController::class, 'destroy'])->name('customers.destroy');
+Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('customers.show');
+
+// API routes for customer
+Route::get('/api/customers/stats', [CustomerController::class, 'getStats'])->name('customers.stats');
+Route::get('/api/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
 Route::get('/services', function () {
     return view('services');
@@ -35,6 +45,10 @@ Route::get('/inventory', function () {
 
 Route::get('/employees', function () {
     return view('employees');
+});
+
+Route::get('/monitoring', function () {
+    return view('monitoring');
 });
 
 Route::get('/reports', function () {
