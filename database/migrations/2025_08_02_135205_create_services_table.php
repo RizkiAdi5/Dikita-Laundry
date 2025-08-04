@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description')->nullable();
             $table->decimal('price', 10, 2);
-            $table->enum('unit', ['kg', 'piece', 'set'])->default('kg');
+            $table->enum('unit', ['kg', 'piece', 'set', 'm2'])->default('kg');
             $table->integer('estimated_days')->default(1);
             $table->boolean('is_active')->default(true);
             $table->integer('sort_order')->default(0);

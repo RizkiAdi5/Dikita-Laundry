@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ServiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -35,9 +36,19 @@ Route::get('/customers/{customer}', [CustomerController::class, 'show'])->name('
 Route::get('/api/customers/stats', [CustomerController::class, 'getStats'])->name('customers.stats');
 Route::get('/api/customers/search', [CustomerController::class, 'search'])->name('customers.search');
 
-Route::get('/services', function () {
-    return view('services');
-});
+// Service routes
+Route::get('/services', [ServiceController::class, 'index'])->name('services.index');
+Route::get('/services/create', [ServiceController::class, 'create'])->name('services.create');
+Route::post('/services', [ServiceController::class, 'store'])->name('services.store');
+Route::get('/services/{service}/edit', [ServiceController::class, 'edit'])->name('services.edit');
+Route::put('/services/{service}', [ServiceController::class, 'update'])->name('services.update');
+Route::delete('/services/{service}', [ServiceController::class, 'destroy'])->name('services.destroy');
+Route::get('/services/{service}', [ServiceController::class, 'show'])->name('services.show');
+
+// API routes for service
+Route::get('/api/services/stats', [ServiceController::class, 'getStats'])->name('services.stats');
+Route::get('/api/services/search', [ServiceController::class, 'search'])->name('services.search');
+Route::patch('/api/services/{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('services.toggle-status');
 
 Route::get('/inventory', function () {
     return view('inventory');
