@@ -15,7 +15,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Layanan</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total']) }}</p>
-                <p class="text-sm text-green-600">+3 dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -28,7 +27,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Layanan Aktif</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active']) }}</p>
-                <p class="text-sm text-green-600">+2 dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -41,7 +39,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Pendapatan</p>
                 <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_revenue']) }}</p>
-                <p class="text-sm text-green-600">+15% dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -54,7 +51,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Rata-rata Harga</p>
                 <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['avg_price']) }}</p>
-                <p class="text-sm text-green-600">+8% dari bulan lalu</p>
             </div>
         </div>
     </div>

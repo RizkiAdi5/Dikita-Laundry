@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
+use App\Http\Controllers\EmployeeController;
 
 /*
 |--------------------------------------------------------------------------
@@ -50,13 +51,25 @@ Route::get('/api/services/stats', [ServiceController::class, 'getStats'])->name(
 Route::get('/api/services/search', [ServiceController::class, 'search'])->name('services.search');
 Route::patch('/api/services/{service}/toggle-status', [ServiceController::class, 'toggleStatus'])->name('services.toggle-status');
 
+// Employee routes
+Route::get('/employees', [EmployeeController::class, 'index'])->name('employees.index');
+Route::get('/employees/create', [EmployeeController::class, 'create'])->name('employees.create');
+Route::post('/employees', [EmployeeController::class, 'store'])->name('employees.store');
+Route::get('/employees/{employee}/edit', [EmployeeController::class, 'edit'])->name('employees.edit');
+Route::put('/employees/{employee}', [EmployeeController::class, 'update'])->name('employees.update');
+Route::delete('/employees/{employee}', [EmployeeController::class, 'destroy'])->name('employees.destroy');
+Route::get('/employees/{employee}', [EmployeeController::class, 'show'])->name('employees.show');
+
+// API routes for employee
+Route::get('/api/employees/stats', [EmployeeController::class, 'getStats'])->name('employees.stats');
+Route::get('/api/employees/search', [EmployeeController::class, 'search'])->name('employees.search');
+Route::patch('/api/employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+
 Route::get('/inventory', function () {
     return view('inventory');
 });
 
-Route::get('/employees', function () {
-    return view('employees');
-});
+
 
 Route::get('/monitoring', function () {
     return view('monitoring');

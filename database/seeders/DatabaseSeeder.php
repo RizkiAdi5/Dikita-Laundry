@@ -15,6 +15,7 @@ class DatabaseSeeder extends Seeder
             OrderStatusSeeder::class,
             ServiceSeeder::class,
             CustomerSeeder::class,
+            EmployeeSeeder::class,
         ]);
     }
 }
