@@ -3,6 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', 'LaundryDikita - Sistem Monitoring Laundry')</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -61,6 +62,11 @@
                 <a href="/employees" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('employees*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-user-tie w-5 h-5 mr-3"></i>
                     <span>Karyawan</span>
+                </a>
+                
+                <a href="/expenses" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('expenses*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <i class="fas fa-money-bill-wave w-5 h-5 mr-3"></i>
+                    <span>Pengeluaran</span>
                 </a>
             </div>
             
@@ -124,6 +130,74 @@
 
         <!-- Page Content -->
         <main class="p-6">
+            <!-- Flash Messages -->
+            @if(session('success'))
+                <div id="flash-success" class="mb-6 bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-check-circle mr-2"></i>
+                        <span>{{ session('success') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-green-500 hover:text-green-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('error'))
+                <div id="flash-error" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-circle mr-2"></i>
+                        <span>{{ session('error') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-red-500 hover:text-red-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('warning'))
+                <div id="flash-warning" class="mb-6 bg-yellow-100 border border-yellow-400 text-yellow-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle mr-2"></i>
+                        <span>{{ session('warning') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-yellow-500 hover:text-yellow-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if(session('info'))
+                <div id="flash-info" class="mb-6 bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg flex items-center justify-between">
+                    <div class="flex items-center">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <span>{{ session('info') }}</span>
+                    </div>
+                    <button onclick="this.parentElement.remove()" class="text-blue-500 hover:text-blue-700">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            @endif
+
+            @if($errors->any())
+                <div id="flash-validation" class="mb-6 bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+                    <div class="flex items-center justify-between mb-2">
+                        <div class="flex items-center">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>
+                            <span class="font-semibold">Terjadi kesalahan validasi:</span>
+                        </div>
+                        <button onclick="this.parentElement.parentElement.remove()" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <ul class="list-disc list-inside text-sm">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
+
             @yield('content')
         </main>
     </div>
@@ -157,6 +231,40 @@
             if (window.innerWidth >= 1024) {
                 closeSidebar();
             }
+        });
+
+        // Flash message auto-hide functionality
+        document.addEventListener('DOMContentLoaded', function() {
+            const flashMessages = document.querySelectorAll('[id^="flash-"]');
+            
+            flashMessages.forEach(function(message) {
+                // Auto-hide after 5 seconds
+                setTimeout(function() {
+                    if (message && message.parentNode) {
+                        message.style.transition = 'opacity 0.5s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(function() {
+                            if (message && message.parentNode) {
+                                message.remove();
+                            }
+                        }, 500);
+                    }
+                }, 5000);
+
+                // Add click to close functionality
+                const closeBtn = message.querySelector('button');
+                if (closeBtn) {
+                    closeBtn.addEventListener('click', function() {
+                        message.style.transition = 'opacity 0.5s ease-out';
+                        message.style.opacity = '0';
+                        setTimeout(function() {
+                            if (message && message.parentNode) {
+                                message.remove();
+                            }
+                        }, 500);
+                    });
+                }
+            });
         });
     </script>
 
