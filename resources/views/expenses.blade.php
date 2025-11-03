@@ -482,26 +482,34 @@ document.getElementById('createForm').addEventListener('submit', function(e) {
     fetch('{{ route("expenses.store") }}', {
         method: 'POST',
         body: formData,
+        credentials: 'same-origin',
         headers: {
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json'
         }
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            showToast('✅ ' + data.message, 'success');
+    .then(async (response) => {
+        const contentType = response.headers.get('content-type') || '';
+        if (contentType.includes('application/json')) {
+            const data = await response.json();
+            if (data.success) {
+                showToast('✅ ' + data.message, 'success');
+                closeCreateModal();
+                setTimeout(() => { location.reload(); }, 1200);
+            } else {
+                showToast('❌ ' + (data.message || 'Terjadi kesalahan'), 'error');
+            }
+        } else if (response.ok) {
+            // Likely a redirect HTML from non-AJAX fallback; treat as success
+            showToast('✅ Pengeluaran berhasil ditambahkan', 'success');
             closeCreateModal();
-            setTimeout(() => {
-                location.reload();
-            }, 1500);
+            setTimeout(() => { location.reload(); }, 1200);
         } else {
-            showToast('❌ ' + (data.message || 'Terjadi kesalahan'), 'error');
+            showToast('❌ Terjadi kesalahan saat menyimpan data', 'error');
         }
     })
-    .catch(error => {
-        console.error('Error:', error);
-        showToast('❌ Terjadi kesalahan saat menyimpan data', 'error');
-    })
+    .catch(() => { showToast('❌ Terjadi kesalahan saat menyimpan data', 'error'); })
     .finally(() => {
         // Reset button state
         submitBtn.disabled = false;
