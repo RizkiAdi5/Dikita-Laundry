@@ -144,6 +144,12 @@ class Employee extends Model
         return $query->where('position', 'like', "%{$position}%");
     }
 
+    // Relationship dengan Order
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     // Method untuk mendapatkan total order yang ditangani (placeholder)
     public function getTotalOrdersAttribute()
     {

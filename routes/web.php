@@ -2,11 +2,13 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\OrderController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\ExpenseController;
+use App\Http\Controllers\ReportController;
 
 /*
 |--------------------------------------------------------------------------
@@ -19,9 +21,7 @@ use App\Http\Controllers\ExpenseController;
 |
 */
 
-Route::get('/', function () {
-    return view('index');
-});
+Route::get('/', [DashboardController::class, 'index']);
 
 // Orders
 Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
@@ -108,8 +108,6 @@ Route::get('/monitoring', function () {
     return view('monitoring');
 });
 
-Route::get('/reports', function () {
-    return view('reports');
-});
+Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
 
 

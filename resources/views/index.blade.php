@@ -14,8 +14,8 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Pesanan</p>
-                <p class="text-2xl font-bold text-gray-900">1,234</p>
-                <p class="text-sm text-green-600">+12% dari bulan lalu</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format((int)($totalOrders ?? 0), 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500">Semua waktu</p>
             </div>
         </div>
     </div>
@@ -26,9 +26,9 @@
                 <i class="fas fa-users text-2xl"></i>
             </div>
             <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Pelanggan Aktif</p>
-                <p class="text-2xl font-bold text-gray-900">856</p>
-                <p class="text-sm text-green-600">+8% dari bulan lalu</p>
+                <p class="text-sm font-medium text-gray-600">Total Pelanggan</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format((int)($activeCustomers ?? 0), 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500">Terdaftar</p>
             </div>
         </div>
     </div>
@@ -40,8 +40,8 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Pendapatan Hari Ini</p>
-                <p class="text-2xl font-bold text-gray-900">Rp 2.5M</p>
-                <p class="text-sm text-green-600">+15% dari kemarin</p>
+                <p class="text-2xl font-bold text-gray-900">Rp {{ number_format((float)($revenueToday ?? 0), 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500">Pembayaran tercatat</p>
             </div>
         </div>
     </div>
@@ -52,9 +52,9 @@
                 <i class="fas fa-clock text-2xl"></i>
             </div>
             <div class="ml-4">
-                <p class="text-sm font-medium text-gray-600">Pesanan Pending</p>
-                <p class="text-2xl font-bold text-gray-900">23</p>
-                <p class="text-sm text-red-600">-5% dari kemarin</p>
+                <p class="text-sm font-medium text-gray-600">Pesanan Belum Selesai</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format((int)($pendingOrders ?? 0), 0, ',', '.') }}</p>
+                <p class="text-sm text-gray-500">Tidak termasuk selesai</p>
             </div>
         </div>
     </div>
@@ -65,7 +65,7 @@
     <!-- Sales Chart -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-6">
-            <h3 class="text-lg font-semibold text-gray-800">Grafik Penjualan</h3>
+            <h3 class="text-lg font-semibold text-gray-800">Grafik Pendapatan</h3>
             <select class="text-sm border border-gray-300 rounded-md px-3 py-1">
                 <option>7 Hari Terakhir</option>
                 <option>30 Hari Terakhir</option>
@@ -81,6 +81,7 @@
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Status Pesanan</h3>
+            <div class="text-sm text-gray-500">Perbandingan jumlah pesanan per status</div>
         </div>
         <div class="relative" style="height: 300px;">
             <canvas id="orderStatusChart"></canvas>
@@ -107,36 +108,22 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
+                @forelse(($recentOrders ?? []) as $ro)
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-001</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Ahmad Rizki</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cuci Reguler</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp 25.000</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $ro->order_number }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $ro->customer->name ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->items_count ? $ro->items_count.' item' : '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp {{ number_format((float)$ro->total, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Dalam Proses</span>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $ro->status->name ?? '-' }}</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 jam yang lalu</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->created_at->diffForHumans() }}</td>
                 </tr>
+                @empty
                 <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-002</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Siti Nurhaliza</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cuci Express</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp 35.000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Selesai</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 jam yang lalu</td>
+                    <td colspan="6" class="px-6 py-6 text-center text-sm text-gray-500">Belum ada pesanan.</td>
                 </tr>
-                <tr>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-003</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Budi Santoso</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Cuci Setrika</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp 45.000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Siap Diambil</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 menit yang lalu</td>
-                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -146,8 +133,7 @@
 <div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
     <h3 class="text-lg font-semibold text-gray-800 mb-4">Aksi Cepat</h3>
     <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-        
-        <a href="/orders" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+        <a href="/orders/create" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
             <i class="fas fa-plus-circle text-green-600 text-2xl mb-2"></i>
             <span class="text-sm font-medium text-gray-700">Pesanan Baru</span>
         </a>
@@ -159,21 +145,29 @@
             <i class="fas fa-box-open text-purple-600 text-2xl mb-2"></i>
             <span class="text-sm font-medium text-gray-700">Cek Stok</span>
         </a>
+        <a href="/reports" class="flex flex-col items-center p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-colors">
+            <i class="fas fa-chart-line text-blue-600 text-2xl mb-2"></i>
+            <span class="text-sm font-medium text-gray-700">Laporan</span>
+        </a>
     </div>
 </div>
 @endsection
 
 @section('scripts')
 <script>
+const salesSeries = @json($salesSeries ?? []);
+const statusCounts = @json(($statusCounts ?? []));
 // Sales Chart
 const salesCtx = document.getElementById('salesChart').getContext('2d');
+const salesLabels = salesSeries.map(s => s.date);
+const salesData = salesSeries.map(s => Math.round((s.amount || 0)));
 const salesChart = new Chart(salesCtx, {
     type: 'line',
     data: {
-        labels: ['Sen', 'Sel', 'Rab', 'Kam', 'Jum', 'Sab', 'Min'],
+        labels: salesLabels,
         datasets: [{
-            label: 'Pendapatan (Juta Rupiah)',
-            data: [2.1, 2.3, 2.8, 2.5, 3.1, 3.5, 2.9],
+            label: 'Pendapatan Harian (Rp)',
+            data: salesData,
             borderColor: 'rgb(59, 130, 246)',
             backgroundColor: 'rgba(59, 130, 246, 0.1)',
             tension: 0.4,
@@ -226,7 +220,7 @@ const salesChart = new Chart(salesCtx, {
                     },
                     color: '#6b7280',
                     callback: function(value) {
-                        return 'Rp ' + value + 'M';
+                        return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
                     }
                 }
             }
@@ -240,12 +234,14 @@ const salesChart = new Chart(salesCtx, {
 
 // Order Status Chart
 const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
+const statusLabels = (statusCounts || []).map(s => s.name);
+const statusData = (statusCounts || []).map(s => s.orders_count || 0);
 const orderStatusChart = new Chart(statusCtx, {
     type: 'doughnut',
     data: {
-        labels: ['Selesai', 'Dalam Proses', 'Siap Diambil', 'Pending'],
+        labels: statusLabels,
         datasets: [{
-            data: [45, 25, 20, 10],
+            data: statusData,
             backgroundColor: [
                 'rgb(34, 197, 94)',
                 'rgb(59, 130, 246)',
