@@ -18,6 +18,7 @@
     </style>
 </head>
 <body class="bg-gray-50">
+    @auth
     <!-- Sidebar -->
     <div id="sidebar" class="fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg sidebar-transition transform -translate-x-full lg:translate-x-0">
         <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200">
@@ -31,64 +32,90 @@
         </div>
         
         <nav class="mt-6 px-4">
+            @php
+                $user = auth()->user();
+            @endphp
+            
             <div class="space-y-2">
-                <a href="/" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('/') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('dashboard'))
+                <a href="{{ route('dashboard') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('/') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-tachometer-alt w-5 h-5 mr-3"></i>
                     <span>Dashboard</span>
                 </a>
+                @endif
                 
-                
-                
-                <a href="/orders" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('orders*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('orders'))
+                <a href="{{ route('orders.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('orders*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-shopping-cart w-5 h-5 mr-3"></i>
                     <span>Pesanan</span>
                 </a>
+                @endif
                 
-                <a href="/customers" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('customers*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('customers'))
+                <a href="{{ route('customers.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('customers*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-users w-5 h-5 mr-3"></i>
                     <span>Pelanggan</span>
                 </a>
+                @endif
                 
-                <a href="/services" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('services*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('services'))
+                <a href="{{ route('services.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('services*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-concierge-bell w-5 h-5 mr-3"></i>
                     <span>Layanan</span>
                 </a>
+                @endif
                 
-                <a href="/inventory" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('inventory*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('inventory'))
+                <a href="{{ route('inventory.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('inventory*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-boxes w-5 h-5 mr-3"></i>
                     <span>Inventori</span>
                 </a>
+                @endif
                 
-                <a href="/employees" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('employees*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('employees'))
+                <a href="{{ route('employees.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('employees*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-user-tie w-5 h-5 mr-3"></i>
                     <span>Karyawan</span>
                 </a>
+                @endif
                 
-                <a href="/expenses" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('expenses*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                @if($user && $user->canAccess('expenses'))
+                <a href="{{ route('expenses.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('expenses*') ? 'bg-blue-50 text-blue-600' : '' }}">
                     <i class="fas fa-money-bill-wave w-5 h-5 mr-3"></i>
                     <span>Pengeluaran</span>
                 </a>
+                @endif
             </div>
             
+            @if($user && ($user->canAccess('reports') || $user->canAccess('reports.stock') || $user->canAccess('reports.performance')))
             <div class="mt-8 pt-6 border-t border-gray-200">
                 <div class="px-4">
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Laporan</h3>
                 </div>
                 <div class="mt-2 space-y-2">
+                    @if($user && $user->canAccess('reports'))
                     <a href="{{ route('reports.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-bar w-5 h-5 mr-3"></i>
                         <span>Laporan Utama</span>
                     </a>
-                    <a href="{{ route('reports.stock') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/stock') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    @endif
+                    
+                    @if($user && $user->canAccess('reports.stock'))
+                    <a href="{{ route('reports.stock') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/stock*') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-pie w-5 h-5 mr-3"></i>
                         <span>Laporan Stok</span>
                     </a>
-                    <a href="{{ route('reports.performance') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/performance') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    @endif
+                    
+                    @if($user && $user->canAccess('reports.performance'))
+                    <a href="{{ route('reports.performance') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/performance*') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-area w-5 h-5 mr-3"></i>
                         <span>Laporan Performa</span>
                     </a>
+                    @endif
                 </div>
             </div>
+            @endif
         </nav>
     </div>
 
@@ -116,12 +143,31 @@
                     </div>
                     
                     <div class="flex items-center space-x-3">
-                        <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
-                            <span class="text-white font-semibold text-sm">A</span>
-                        </div>
-                        <div class="hidden md:block">
-                            <p class="text-sm font-medium text-gray-700">Admin</p>
-                            <p class="text-xs text-gray-500">admin@laundrydikita.com</p>
+                        <div class="relative group">
+                            <div class="flex items-center space-x-3 cursor-pointer">
+                                <div class="w-8 h-8 bg-blue-600 rounded-full flex items-center justify-center">
+                                    <span class="text-white font-semibold text-sm">{{ strtoupper(substr(auth()->user()->name ?? 'A', 0, 1)) }}</span>
+                                </div>
+                                <div class="hidden md:block">
+                                    <p class="text-sm font-medium text-gray-700">{{ auth()->user()->name ?? 'User' }}</p>
+                                    <p class="text-xs text-gray-500">{{ ucfirst(str_replace('_', ' ', auth()->user()->role ?? 'user')) }}</p>
+                                </div>
+                                <i class="fas fa-chevron-down text-gray-500 text-xs"></i>
+                            </div>
+                            <div class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all z-50">
+                                <div class="py-2">
+                                    <div class="px-4 py-2 border-b border-gray-200">
+                                        <p class="text-sm font-medium text-gray-900">{{ auth()->user()->name ?? 'User' }}</p>
+                                        <p class="text-xs text-gray-500">{{ auth()->user()->email ?? '' }}</p>
+                                    </div>
+                                    <form method="POST" action="{{ route('logout') }}" class="px-2 py-2">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left px-3 py-2 text-sm text-red-600 hover:bg-red-50 rounded-lg transition-colors">
+                                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -269,5 +315,6 @@
     </script>
 
     @yield('scripts')
+    @endauth
 </body>
 </html> 
