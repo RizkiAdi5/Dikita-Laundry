@@ -34,5 +34,10 @@ return [
             'channel' => env('SLACK_BOT_USER_DEFAULT_CHANNEL'),
         ],
     ],
+'whatsapp' => [
+    'gateway_url' => env('WHATSAPP_GATEWAY_URL'),
+    'token' => env('WHATSAPP_TOKEN'),
+    'sender' => env('WHATSAPP_SENDER', '089670468240'),
+],
 
 ];

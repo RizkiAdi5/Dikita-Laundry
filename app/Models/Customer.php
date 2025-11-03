@@ -81,20 +81,26 @@ class Customer extends Model
     }
 
     // Method untuk mendapatkan total transaksi (placeholder)
+    public function orders()
+    {
+        return $this->hasMany(Order::class);
+    }
+
     public function getTotalTransactionsAttribute()
     {
-        return 0; // Akan diupdate setelah model Order dibuat
+        return $this->orders()->count();
     }
 
     // Method untuk mendapatkan total pendapatan (placeholder)
     public function getTotalRevenueAttribute()
     {
-        return 0; // Akan diupdate setelah model Order dibuat
+        return (float) $this->orders()->sum('total');
     }
 
     // Method untuk mendapatkan tanggal terakhir transaksi (placeholder)
     public function getLastTransactionDateAttribute()
     {
-        return null; // Akan diupdate setelah model Order dibuat
+        $last = $this->orders()->latest('created_at')->value('created_at');
+        return $last ? $last : null;
     }
 } 

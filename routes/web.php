@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\OrderController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
@@ -22,9 +23,16 @@ Route::get('/', function () {
     return view('index');
 });
 
-Route::get('/orders', function () {
-    return view('orders');
-});
+// Orders
+Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
+Route::get('/orders/create', [OrderController::class, 'create'])->name('orders.create');
+Route::post('/orders', [OrderController::class, 'store'])->name('orders.store');
+Route::get('/orders/{order}/edit', [OrderController::class, 'edit'])->name('orders.edit');
+Route::put('/orders/{order}', [OrderController::class, 'update'])->name('orders.update');
+Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy');
+Route::get('/orders/{order}', [OrderController::class, 'show'])->name('orders.show');
+Route::get('/orders/{order}/bill', [OrderController::class, 'bill'])->name('orders.bill');
+
 
 // Customer routes - Perbaiki urutan untuk menghindari konflik routing
 Route::get('/customers', [CustomerController::class, 'index'])->name('customers.index');

@@ -112,6 +112,9 @@ class CustomerController extends Controller
      */
     public function show(Customer $customer)
     {
+        $customer->load(['orders' => function($q){
+            $q->with(['items','status'])->latest()->limit(10);
+        }]);
         return view('customers.show', compact('customer'));
     }
 

@@ -14,7 +14,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Pesanan Hari Ini</p>
-                <p class="text-2xl font-bold text-gray-900">23</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['today'] ?? 0) }}</p>
                 <p class="text-sm text-green-600">+5 dari kemarin</p>
             </div>
         </div>
@@ -27,7 +27,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Dalam Proses</p>
-                <p class="text-2xl font-bold text-gray-900">8</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['in_progress'] ?? 0) }}</p>
                 <p class="text-sm text-yellow-600">Rata-rata 2.3 jam</p>
             </div>
         </div>
@@ -40,7 +40,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Selesai Hari Ini</p>
-                <p class="text-2xl font-bold text-gray-900">15</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['completed_today'] ?? 0) }}</p>
                 <p class="text-sm text-green-600">65% completion rate</p>
             </div>
         </div>
@@ -53,7 +53,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Terlambat</p>
-                <p class="text-2xl font-bold text-gray-900">2</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['delayed'] ?? 0) }}</p>
                 <p class="text-sm text-red-600">Perlu perhatian</p>
             </div>
         </div>
@@ -77,10 +77,10 @@
         </select>
         <input type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
     </div>
-    <button class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+    <a href="{{ route('orders.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
         <i class="fas fa-plus mr-2"></i>
         Pesanan Baru
-    </button>
+    </a>
 </div>
 
 <!-- Orders Table -->
@@ -100,170 +100,57 @@
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
+                @forelse($orders as $order)
                 <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-001</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $order->order_number }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
-                                <span class="text-blue-600 font-semibold text-sm">AR</span>
+                                <span class="text-blue-600 font-semibold text-sm">{{ $order->customer->initials }}</span>
                             </div>
                             <div>
-                                <div class="text-sm font-medium text-gray-900">Ahmad Rizki</div>
-                                <div class="text-sm text-gray-500">081234567890</div>
+                                <div class="text-sm font-medium text-gray-900">{{ $order->customer->name }}</div>
+                                <div class="text-sm text-gray-500">{{ $order->customer->phone }}</div>
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cuci Reguler</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 25.000</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $order->items->first()->item_name ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $order->formatted_total }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-yellow-100 text-yellow-800">Dalam Proses</span>
+                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $order->status->name }}</span>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
                             <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 75%"></div>
+                                <div class="bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
                             </div>
-                            <span class="text-xs text-gray-500">75%</span>
+                            <span class="text-xs text-gray-500">-</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">2 jam yang lalu</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->created_at->format('d M Y') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
+                            <a href="{{ route('orders.show', $order) }}" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
                                 <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="text-green-600 hover:text-green-900" title="Update Status">
+                            </a>
+                            <a href="{{ route('orders.edit', $order) }}" class="text-green-600 hover:text-green-900" title="Edit Pesanan">
                                 <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-900" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </button>
+                            </a>
+                            <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus pesanan {{ $order->order_number }}?');">
+                                @csrf
+                                @method('DELETE')
+                                <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
                         </div>
                     </td>
                 </tr>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-002</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
-                                <span class="text-green-600 font-semibold text-sm">SN</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">Siti Nurhaliza</div>
-                                <div class="text-sm text-gray-500">081234567891</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cuci Express</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 35.000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-green-100 text-green-800">Selesai</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div class="bg-green-600 h-2 rounded-full" style="width: 100%"></div>
-                            </div>
-                            <span class="text-xs text-gray-500">100%</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">1 jam yang lalu</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="text-green-600 hover:text-green-900" title="Update Status">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-900" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
+                @empty
+                <tr>
+                    <td colspan="8" class="px-6 py-10 text-center text-gray-500">Belum ada pesanan.</td>
                 </tr>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-003</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
-                                <span class="text-purple-600 font-semibold text-sm">BS</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">Budi Santoso</div>
-                                <div class="text-sm text-gray-500">081234567892</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Cuci Setrika</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 45.000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-blue-100 text-blue-800">Siap Diambil</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 90%"></div>
-                            </div>
-                            <span class="text-xs text-gray-500">90%</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">30 menit yang lalu</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="text-green-600 hover:text-green-900" title="Update Status">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-900" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
-                <tr class="hover:bg-gray-50">
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">#LAU-004</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
-                                <span class="text-yellow-600 font-semibold text-sm">DW</span>
-                            </div>
-                            <div>
-                                <div class="text-sm font-medium text-gray-900">Dewi Wati</div>
-                                <div class="text-sm text-gray-500">081234567893</div>
-                            </div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Dry Clean</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">Rp 75.000</td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">Pending</span>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap">
-                        <div class="flex items-center">
-                            <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div class="bg-gray-400 h-2 rounded-full" style="width: 10%"></div>
-                            </div>
-                            <span class="text-xs text-gray-500">10%</span>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">15 menit yang lalu</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <div class="flex space-x-2">
-                            <button class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                            <button class="text-green-600 hover:text-green-900" title="Update Status">
-                                <i class="fas fa-edit"></i>
-                            </button>
-                            <button class="text-red-600 hover:text-red-900" title="Hapus">
-                                <i class="fas fa-trash"></i>
-                            </button>
-                        </div>
-                    </td>
-                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>
@@ -301,46 +188,130 @@
     </div>
 </div>
 
-<!-- Order Alerts -->
-<div class="mt-8 bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-semibold text-gray-800">Peringatan Pesanan</h3>
-        <button class="text-blue-600 hover:text-blue-700 text-sm">Lihat Semua</button>
-    </div>
-    
-    <div class="space-y-3">
-        <div class="flex items-center p-3 bg-red-50 rounded-lg border-l-4 border-red-500">
-            <i class="fas fa-exclamation-triangle text-red-500 mr-3"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Pesanan #LAU-005 Terlambat</p>
-                <p class="text-xs text-gray-600">Estimasi: 2 jam, Real: 3.5 jam - Perlu dipercepat</p>
-            </div>
-            <span class="text-xs text-gray-500">5 menit yang lalu</span>
-        </div>
 
-        <div class="flex items-center p-3 bg-yellow-50 rounded-lg border-l-4 border-yellow-500">
-            <i class="fas fa-clock text-yellow-500 mr-3"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Pesanan #LAU-006 Menunggu Konfirmasi</p>
-                <p class="text-xs text-gray-600">Sudah 1 jam menunggu konfirmasi pelanggan</p>
-            </div>
-            <span class="text-xs text-gray-500">15 menit yang lalu</span>
-        </div>
-
-        <div class="flex items-center p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-            <i class="fas fa-info-circle text-blue-500 mr-3"></i>
-            <div class="flex-1">
-                <p class="text-sm font-medium text-gray-900">Pesanan #LAU-007 Siap Diambil</p>
-                <p class="text-xs text-gray-600">Pesanan sudah selesai dan siap diambil pelanggan</p>
-            </div>
-            <span class="text-xs text-gray-500">30 menit yang lalu</span>
-        </div>
-    </div>
-</div>
 @endsection
 
 @section('scripts')
 <script>
+function openCreateModal(){ document.getElementById('createOrderModal').classList.remove('hidden'); document.body.style.overflow='hidden'; }
+function closeCreateModal(){ document.getElementById('createOrderModal').classList.add('hidden'); document.body.style.overflow='auto'; document.getElementById('orderCreateForm')?.reset(); }
+
+document.addEventListener('DOMContentLoaded', function(){
+  const form = document.getElementById('orderCreateForm');
+  if(form){
+    // Dynamic items handling
+    const itemsContainer = document.getElementById('itemsContainer');
+    const template = document.getElementById('itemRowTemplate');
+    const addBtn = document.getElementById('addItemRowBtn');
+    const discountInput = form.querySelector('input[name="discount"]');
+    const taxInput = form.querySelector('input[name="tax"]');
+    const subtotalDisplay = document.getElementById('subtotalDisplay');
+    const totalDisplay = document.getElementById('totalDisplay');
+
+    function formatNumber(n){
+      const v = isNaN(n) ? 0 : n;
+      return 'Rp ' + Math.round(v).toLocaleString('id-ID');
+    }
+
+    function recalc(){
+      let subtotal = 0;
+      itemsContainer.querySelectorAll('.item-row').forEach(row => {
+        const qty = parseFloat(row.querySelector('.qty-input').value || '0');
+        const price = parseFloat(row.querySelector('.price-input').value || '0');
+        const line = Math.max(0, qty * price);
+        row.querySelector('.line-total').value = formatNumber(line);
+        subtotal += line;
+      });
+      const discount = parseFloat(discountInput.value || '0');
+      const tax = parseFloat(taxInput.value || '0');
+      const total = Math.max(0, subtotal - discount + tax);
+      subtotalDisplay.value = formatNumber(subtotal);
+      totalDisplay.value = formatNumber(total);
+    }
+
+    function wireRow(row){
+      const serviceSelect = row.querySelector('.service-select');
+      const priceInput = row.querySelector('.price-input');
+      const qtyInput = row.querySelector('.qty-input');
+      const removeBtn = row.querySelector('.remove-row');
+
+      function syncPrice(){
+        const opt = serviceSelect?.selectedOptions?.[0];
+        const price = opt ? opt.getAttribute('data-price') : '';
+        if (price) priceInput.value = price;
+        recalc();
+      }
+
+      serviceSelect.addEventListener('change', syncPrice);
+      qtyInput.addEventListener('input', recalc);
+      priceInput.addEventListener('input', recalc);
+      removeBtn.addEventListener('click', function(){
+        row.remove();
+        if (itemsContainer.querySelectorAll('.item-row').length === 0) {
+          addRow();
+        } else {
+          recalc();
+        }
+      });
+
+      syncPrice();
+    }
+
+    function addRow(){
+      const clone = template.firstElementChild.cloneNode(true);
+      itemsContainer.appendChild(clone);
+      wireRow(clone);
+    }
+
+    addBtn.addEventListener('click', addRow);
+    discountInput.addEventListener('input', recalc);
+    taxInput.addEventListener('input', recalc);
+
+    // Initialize with one row
+    addRow();
+
+    form.addEventListener('submit', function(e){
+      e.preventDefault();
+      const btn = document.getElementById('orderSubmitBtn');
+      const original = btn.innerHTML;
+      btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+      const fd = new FormData(form);
+      const body = new FormData();
+      body.append('customer_id', fd.get('customer_id'));
+      body.append('pickup_date', fd.get('pickup_date'));
+      body.append('delivery_date', fd.get('delivery_date'));
+      if (fd.get('discount')) body.append('discount', fd.get('discount'));
+      if (fd.get('tax')) body.append('tax', fd.get('tax'));
+      if (fd.get('notes')) body.append('notes', fd.get('notes'));
+      if (fd.get('payment_status')) body.append('payment_status', fd.get('payment_status'));
+      if (fd.get('payment_method')) body.append('payment_method', fd.get('payment_method'));
+      if (fd.get('paid_amount')) body.append('paid_amount', fd.get('paid_amount'));
+
+      // collect dynamic items
+      const rows = itemsContainer.querySelectorAll('.item-row');
+      rows.forEach((row, idx) => {
+        const serviceId = row.querySelector('.service-select').value;
+        const qty = row.querySelector('.qty-input').value;
+        const price = row.querySelector('.price-input').value;
+        body.append(`items[${idx}][service_id]`, serviceId);
+        body.append(`items[${idx}][quantity]`, qty);
+        body.append(`items[${idx}][unit_price]`, price);
+        const itemNotes = fd.get('item_notes');
+        if (itemNotes) body.append(`items[${idx}][notes]`, itemNotes);
+      });
+
+      fetch('{{ route('orders.store') }}', {
+        method: 'POST',
+        body,
+        credentials: 'same-origin',
+        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 'X-Requested-With': 'XMLHttpRequest', 'Accept':'application/json' }
+      }).then(r=>r.json()).then(data=>{
+        if(data.success){ closeCreateModal(); location.reload(); }
+        else{ alert(data.message || 'Gagal membuat pesanan'); }
+      }).catch(()=>alert('Gagal membuat pesanan')).finally(()=>{ btn.disabled=false; btn.innerHTML=original; });
+    });
+  }
+});
 // Update timestamp
 function updateTimestamp() {
     const now = new Date();
@@ -373,33 +344,6 @@ function simulateProgressUpdates() {
 // Update progress every 10 seconds
 setInterval(simulateProgressUpdates, 10000);
 
-// Add click handlers for action buttons
-document.addEventListener('DOMContentLoaded', function() {
-    // View detail buttons
-    document.querySelectorAll('.text-blue-600').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.closest('tr').querySelector('td:first-child').textContent;
-            alert('Melihat detail pesanan: ' + orderId);
-        });
-    });
-
-    // Edit status buttons
-    document.querySelectorAll('.text-green-600').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.closest('tr').querySelector('td:first-child').textContent;
-            alert('Mengupdate status pesanan: ' + orderId);
-        });
-    });
-
-    // Delete buttons
-    document.querySelectorAll('.text-red-600').forEach(button => {
-        button.addEventListener('click', function() {
-            const orderId = this.closest('tr').querySelector('td:first-child').textContent;
-            if (confirm('Apakah Anda yakin ingin menghapus pesanan ' + orderId + '?')) {
-                alert('Pesanan ' + orderId + ' telah dihapus');
-            }
-        });
-    });
-});
+// Note: action button handlers for .text-blue-600 removed; eye icon now links directly to PDF
 </script>
 @endsection 

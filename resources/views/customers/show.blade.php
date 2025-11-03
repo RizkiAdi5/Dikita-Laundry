@@ -169,16 +169,45 @@
         </div>
     </div>
 
-    <!-- Recent Transactions (Placeholder) -->
+    <!-- Recent Transactions -->
     <div class="bg-white rounded-lg shadow-sm border border-gray-200">
         <div class="flex items-center justify-between p-6 border-b border-gray-200">
             <h3 class="text-lg font-semibold text-gray-800">Transaksi Terbaru</h3>
-            <span class="text-sm text-gray-500">Akan tersedia setelah integrasi Orders</span>
         </div>
-        <div class="p-6 text-center text-gray-500">
-            <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
-            <p class="text-lg font-medium text-gray-600">Belum ada transaksi</p>
-            <p class="text-sm text-gray-500">Transaksi akan muncul di sini setelah integrasi dengan sistem Orders</p>
+        <div class="p-6">
+            @if($customer->orders->count() === 0)
+                <div class="text-center text-gray-500">
+                    <i class="fas fa-shopping-cart text-4xl text-gray-300 mb-4"></i>
+                    <p class="text-lg font-medium text-gray-600">Belum ada transaksi</p>
+                </div>
+            @else
+                <div class="overflow-x-auto">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">No. Pesanan</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tanggal</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            @foreach($customer->orders as $order)
+                            <tr>
+                                <td class="px-6 py-3 text-sm font-medium text-gray-900">{{ $order->order_number }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-500">{{ $order->created_at->format('d M Y') }}</td>
+                                <td class="px-6 py-3 text-sm text-gray-700">{{ $order->items->first()->item_name ?? '-' }}</td>
+                                <td class="px-6 py-3 text-sm font-semibold text-gray-900">{{ $order->formatted_total }}</td>
+                                <td class="px-6 py-3 text-sm">
+                                    <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $order->status->name }}</span>
+                                </td>
+                            </tr>
+                            @endforeach
+                        </tbody>
+                    </table>
+                </div>
+            @endif
         </div>
     </div>
 </div>
