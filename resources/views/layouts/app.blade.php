@@ -75,15 +75,15 @@
                     <h3 class="text-xs font-semibold text-gray-500 uppercase tracking-wider">Laporan</h3>
                 </div>
                 <div class="mt-2 space-y-2">
-                    <a href="/reports" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports*') ? 'bg-blue-50 text-blue-600' : '' }}">
+                    <a href="{{ route('reports.index') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-bar w-5 h-5 mr-3"></i>
-                        <span>Laporan Penjualan</span>
+                        <span>Laporan Utama</span>
                     </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <a href="{{ route('reports.stock') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/stock') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-pie w-5 h-5 mr-3"></i>
                         <span>Laporan Stok</span>
                     </a>
-                    <a href="#" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors">
+                    <a href="{{ route('reports.performance') }}" class="flex items-center px-4 py-3 text-gray-700 rounded-lg hover:bg-blue-50 hover:text-blue-600 transition-colors {{ request()->is('reports/performance') ? 'bg-blue-50 text-blue-600' : '' }}">
                         <i class="fas fa-chart-area w-5 h-5 mr-3"></i>
                         <span>Laporan Performa</span>
                     </a>

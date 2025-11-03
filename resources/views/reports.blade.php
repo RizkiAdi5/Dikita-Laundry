@@ -5,6 +5,43 @@
 @section('page-title', 'Laporan')
 
 @section('content')
+<!-- Quick Links to Other Reports -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+    <a href="{{ route('reports.stock') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:border-blue-300 hover:shadow-md transition-all">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-purple-100 text-purple-600 mr-4">
+                <i class="fas fa-box-open text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900">Laporan Stok</h4>
+                <p class="text-sm text-gray-500">Lihat status inventori dan stok</p>
+            </div>
+        </div>
+    </a>
+    <a href="{{ route('reports.performance') }}" class="bg-white rounded-lg shadow-sm border border-gray-200 p-4 hover:border-blue-300 hover:shadow-md transition-all">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-green-100 text-green-600 mr-4">
+                <i class="fas fa-chart-line text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900">Laporan Performa</h4>
+                <p class="text-sm text-gray-500">Analisis performa karyawan & layanan</p>
+            </div>
+        </div>
+    </a>
+    <div class="bg-white rounded-lg shadow-sm border border-blue-200 p-4 border-2">
+        <div class="flex items-center">
+            <div class="p-3 rounded-full bg-blue-100 text-blue-600 mr-4">
+                <i class="fas fa-chart-bar text-xl"></i>
+            </div>
+            <div>
+                <h4 class="font-semibold text-gray-900">Laporan Utama</h4>
+                <p class="text-sm text-gray-500">Ringkasan dan analisis umum</p>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Report Filters -->
 <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 mb-8">
     <form method="GET" action="{{ route('reports.index') }}" class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">

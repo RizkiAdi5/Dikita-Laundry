@@ -8,6 +8,8 @@ use App\Models\Customer;
 use App\Models\Payment;
 use App\Models\Employee;
 use App\Models\Inventory;
+use App\Models\InventoryTransaction;
+use App\Models\OrderStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
 
@@ -144,6 +146,178 @@ class ReportController extends Controller
             'inventoryItems' => $inventoryItems,
             'employeePerformance' => $employeePerformance,
         ]);
+    }
+
+    public function stock(Request $request)
+    {
+        $category = $request->get('category');
+        $supplier = $request->get('supplier');
+
+        $query = Inventory::query()->where('is_active', true);
+        if ($category) {
+            $query->where('category', $category);
+        }
+        if ($supplier) {
+            $query->where('supplier', 'like', "%{$supplier}%");
+        }
+
+        $allItems = $query->orderBy('category')->orderBy('name')->get();
+
+        $lowStockItems = $allItems->filter(function($i){ 
+            return $i->quantity > 0 && $i->min_quantity > 0 && $i->quantity < $i->min_quantity; 
+        });
+        $outOfStockItems = $allItems->filter(function($i){ return $i->quantity <= 0; });
+        $healthyItems = $allItems->filter(function($i){ 
+            return $i->min_quantity > 0 && $i->quantity >= $i->min_quantity; 
+        });
+
+        $byCategory = $allItems->groupBy('category')->map(function($items, $cat){
+            return [
+                'category' => $cat ?: 'Tanpa Kategori',
+                'total_items' => $items->count(),
+                'in_stock' => $items->filter(function($i) { 
+                    return $i->min_quantity > 0 && $i->quantity >= $i->min_quantity; 
+                })->count(),
+                'low_stock' => $items->filter(function($i) { 
+                    return $i->quantity > 0 && $i->min_quantity > 0 && $i->quantity < $i->min_quantity; 
+                })->count(),
+                'out_of_stock' => $items->where('quantity', '<=', 0)->count(),
+            ];
+        })->values();
+
+        // Recent inventory transactions (last 14 days)
+        $recentTransactions = InventoryTransaction::with('inventory')
+            ->whereDate('created_at', '>=', today()->subDays(14))
+            ->latest('created_at')
+            ->limit(50)
+            ->get();
+
+        $categories = Inventory::whereNotNull('category')->distinct()->pluck('category')->filter();
+        $suppliers = Inventory::whereNotNull('supplier')->distinct()->pluck('supplier')->filter();
+
+        return view('reports.stock', compact(
+            'category', 'supplier', 'categories', 'suppliers', 'allItems', 'lowStockItems', 'outOfStockItems', 'healthyItems', 'byCategory', 'recentTransactions'
+        ));
+    }
+
+    public function performance(Request $request)
+    {
+        $period = $request->get('period', 'monthly');
+        $date = $request->get('date', now()->format('Y-m-d'));
+        $role = $request->get('role');
+        $dateRange = $this->getDateRange($period, $date);
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
+
+        // Employee performance
+        $employeeQuery = Employee::query()->where('is_active', true);
+        if ($role) {
+            $employeeQuery->where('role', $role);
+        }
+        $employeePerformance = $employeeQuery->withCount(['orders' => function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            }])
+            ->orderByDesc('orders_count')
+            ->limit(25)
+            ->get();
+
+        // Service performance (top services)
+        $servicePerformance = OrderItem::selectRaw('item_name, COUNT(*) as order_count, SUM(quantity) as total_quantity, SUM(total_price) as total_revenue')
+            ->whereHas('order', function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            })
+            ->groupBy('item_name')
+            ->orderByDesc('total_quantity')
+            ->limit(25)
+            ->get();
+
+        // Order status distribution
+        $statusDistribution = OrderStatus::withCount(['orders' => function($q) use ($startDate, $endDate) {
+                $q->whereBetween('created_at', [$startDate, $endDate]);
+            }])->get(['id','name']);
+
+        $roles = Employee::select('role')->whereNotNull('role')->distinct()->pluck('role')->filter();
+
+        return view('reports.performance', compact(
+            'period', 'date', 'role', 'roles', 'startDate', 'endDate', 'employeePerformance', 'servicePerformance', 'statusDistribution'
+        ));
+    }
+
+    public function exportStockCsv(Request $request)
+    {
+        $request->merge(['per_page' => null]);
+        $category = $request->get('category');
+        $supplier = $request->get('supplier');
+
+        $query = Inventory::query()->where('is_active', true);
+        if ($category) $query->where('category', $category);
+        if ($supplier) $query->where('supplier', 'like', "%{$supplier}%");
+
+        $rows = $query->orderBy('category')->orderBy('name')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="laporan_stok.csv"',
+        ];
+
+        $callback = function() use ($rows) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Nama', 'SKU', 'Kategori', 'Supplier', 'Unit', 'Qty', 'Min Qty', 'Harga Pokok', 'Harga Jual']);
+            foreach ($rows as $r) {
+                fputcsv($out, [
+                    $r->name,
+                    $r->sku,
+                    $r->category,
+                    $r->supplier,
+                    $r->unit,
+                    (string)$r->quantity,
+                    (string)$r->min_quantity,
+                    (string)$r->cost_price,
+                    (string)$r->selling_price,
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->streamDownload($callback, 'laporan_stok.csv', $headers);
+    }
+
+    public function exportPerformanceCsv(Request $request)
+    {
+        $period = $request->get('period', 'monthly');
+        $date = $request->get('date', now()->format('Y-m-d'));
+        $role = $request->get('role');
+        $dateRange = $this->getDateRange($period, $date);
+        $startDate = $dateRange['start'];
+        $endDate = $dateRange['end'];
+
+        $empQuery = Employee::query()->where('is_active', true);
+        if ($role) $empQuery->where('role', $role);
+        $employees = $empQuery->withCount(['orders' => function($q) use ($startDate, $endDate) {
+            $q->whereBetween('created_at', [$startDate, $endDate]);
+        }])->orderByDesc('orders_count')->get();
+
+        $headers = [
+            'Content-Type' => 'text/csv',
+            'Content-Disposition' => 'attachment; filename="laporan_performa.csv"',
+        ];
+
+        $callback = function() use ($employees) {
+            $out = fopen('php://output', 'w');
+            fputcsv($out, ['Nama', 'Role', 'Posisi', 'Pesanan Diproses', 'Telepon']);
+            foreach ($employees as $e) {
+                fputcsv($out, [
+                    $e->name,
+                    $e->role,
+                    $e->position,
+                    (string)$e->orders_count,
+                    $e->phone,
+                ]);
+            }
+            fclose($out);
+        };
+
+        return response()->streamDownload($callback, 'laporan_performa.csv', $headers);
     }
 
     private function getDateRange($period, $date)

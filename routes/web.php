@@ -109,5 +109,9 @@ Route::get('/monitoring', function () {
 });
 
 Route::get('/reports', [ReportController::class, 'index'])->name('reports.index');
+Route::get('/reports/stock', [ReportController::class, 'stock'])->name('reports.stock');
+Route::get('/reports/performance', [ReportController::class, 'performance'])->name('reports.performance');
+Route::get('/reports/stock/export', [ReportController::class, 'exportStockCsv'])->name('reports.stock.export');
+Route::get('/reports/performance/export', [ReportController::class, 'exportPerformanceCsv'])->name('reports.performance.export');
 
 
