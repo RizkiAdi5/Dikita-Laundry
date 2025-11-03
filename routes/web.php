@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\ServiceController;
 use App\Http\Controllers\EmployeeController;
@@ -80,9 +81,18 @@ Route::post('/expenses/{expense}/approve', [ExpenseController::class, 'approve']
 Route::post('/expenses/{expense}/reject', [ExpenseController::class, 'reject'])->name('expenses.reject');
 Route::post('/expenses/{expense}/mark-as-paid', [ExpenseController::class, 'markAsPaid'])->name('expenses.mark-as-paid');
 
-Route::get('/inventory', function () {
-    return view('inventory');
-});
+// Inventory routes
+Route::get('/inventory', [InventoryController::class, 'index'])->name('inventory.index');
+Route::get('/inventory/create', [InventoryController::class, 'create'])->name('inventory.create');
+Route::post('/inventory', [InventoryController::class, 'store'])->name('inventory.store');
+Route::get('/inventory/{inventory}/edit', [InventoryController::class, 'edit'])->name('inventory.edit');
+Route::put('/inventory/{inventory}', [InventoryController::class, 'update'])->name('inventory.update');
+Route::delete('/inventory/{inventory}', [InventoryController::class, 'destroy'])->name('inventory.destroy');
+Route::get('/inventory/{inventory}', [InventoryController::class, 'show'])->name('inventory.show');
+
+// API routes for inventory
+Route::get('/api/inventory/stats', [InventoryController::class, 'getStats'])->name('inventory.stats');
+Route::get('/api/inventory/search', [InventoryController::class, 'search'])->name('inventory.search');
 
 
 
