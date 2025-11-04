@@ -18,12 +18,12 @@ class BillPdfService
         }
 
         $html = View::make('orders.bill', [
-            'order' => $order->load(['customer','items','status']),
+            'order' => $order->load(['customer','items.service','status']),
             'company' => [
-                'name' => 'Dikita Laundry',
-                'address' => 'Jl. Contoh No. 123, Kota Contoh, Indonesia',
-                'phone' => '+62 812-0000-0000',
-                'email' => 'info@dikitalaundry.com',
+                'name' => 'DIKITA LAUNDRY',
+                'address' => 'Jl. Mawar No.11, Sekip Lama, Kec. Singkawang Tengah, Kota Singkawang, Kalimantan Barat 79113',
+                'phone' => '0852-4573-6325',
+                'email' => 'info@dikita-laundry.com',
             ],
         ])->render();
 
