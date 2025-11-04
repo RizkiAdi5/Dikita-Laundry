@@ -61,8 +61,9 @@
 </div>
 
 <!-- Charts and Recent Orders -->
-<div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mb-8">
-    <!-- Sales Chart -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+    <!-- Sales Chart - Hanya Super Admin -->
+    @if(auth()->user()->hasRole('super_admin'))
     <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Grafik Pendapatan</h3>
@@ -76,9 +77,10 @@
             <canvas id="salesChart"></canvas>
         </div>
     </div>
+    @endif
 
-    <!-- Order Status Chart -->
-    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+    <!-- Order Status Chart - Semua Role -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6 {{ auth()->user()->hasRole('super_admin') ? '' : 'lg:col-span-2' }}">
         <div class="flex items-center justify-between mb-6">
             <h3 class="text-lg font-semibold text-gray-800">Status Pesanan</h3>
             <div class="text-sm text-gray-500">Perbandingan jumlah pesanan per status</div>
@@ -109,15 +111,20 @@
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
                 @forelse(($recentOrders ?? []) as $ro)
-                <tr>
+                <tr class="hover:bg-gray-50">
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $ro->order_number }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $ro->customer->name ?? '-' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->items_count ? $ro->items_count.' item' : '' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {{ $ro->items->first()->item_name ?? '-' }}
+                        @if($ro->items->count() > 1)
+                            <span class="text-xs text-gray-400">+{{ $ro->items->count() - 1 }} lainnya</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Rp {{ number_format((float)$ro->total, 0, ',', '.') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $ro->status->name ?? '-' }}</span>
                     </td>
-                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->created_at->format('d/m/Y H:i') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->created_at->timezone('Asia/Jakarta')->format('d/m/Y H:i') }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -156,146 +163,177 @@
 @section('scripts')
 <script>
 const salesSeries = @json($salesSeries ?? []);
-const statusCounts = @json(($statusCounts ?? []));
-// Sales Chart
-const salesCtx = document.getElementById('salesChart').getContext('2d');
-const salesLabels = salesSeries.map(s => s.date);
-const salesData = salesSeries.map(s => Math.round((s.amount || 0)));
-const salesChart = new Chart(salesCtx, {
-    type: 'line',
-    data: {
-        labels: salesLabels,
-        datasets: [{
-            label: 'Pendapatan Harian (Rp)',
-            data: salesData,
-            borderColor: 'rgb(59, 130, 246)',
-            backgroundColor: 'rgba(59, 130, 246, 0.1)',
-            tension: 0.4,
-            fill: true,
-            borderWidth: 3,
-            pointBackgroundColor: 'rgb(59, 130, 246)',
-            pointBorderColor: '#ffffff',
-            pointBorderWidth: 2,
-            pointRadius: 6,
-            pointHoverRadius: 8
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                display: false
-            },
-            tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
+const statusCounts = @json($statusCounts ?? []);
+
+// Sales Chart - Hanya untuk Super Admin
+@if(auth()->user()->hasRole('super_admin'))
+const salesCtx = document.getElementById('salesChart');
+if (salesCtx) {
+    const salesLabels = salesSeries.map(s => s.date);
+    const salesData = salesSeries.map(s => Math.round(s.amount || 0));
+    const salesChart = new Chart(salesCtx.getContext('2d'), {
+        type: 'line',
+        data: {
+            labels: salesLabels,
+            datasets: [{
+                label: 'Pendapatan Harian (Rp)',
+                data: salesData,
                 borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1,
-                cornerRadius: 8,
-                displayColors: false
-            }
+                backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                tension: 0.4,
+                fill: true,
+                borderWidth: 3,
+                pointBackgroundColor: 'rgb(59, 130, 246)',
+                pointBorderColor: '#ffffff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
         },
-        scales: {
-            x: {
-                grid: {
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
                     display: false
                 },
-                ticks: {
-                    font: {
-                        size: 12
-                    },
-                    color: '#6b7280'
+                tooltip: {
+                    backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                    titleColor: '#ffffff',
+                    bodyColor: '#ffffff',
+                    borderColor: 'rgb(59, 130, 246)',
+                    borderWidth: 1,
+                    cornerRadius: 8,
+                    displayColors: false,
+                    callbacks: {
+                        label: function(context) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(context.parsed.y);
+                        }
+                    }
                 }
             },
-            y: {
-                beginAtZero: true,
-                grid: {
-                    color: 'rgba(0, 0, 0, 0.05)'
+            scales: {
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#6b7280'
+                    }
                 },
-                ticks: {
-                    font: {
-                        size: 12
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(0, 0, 0, 0.05)'
                     },
-                    color: '#6b7280',
-                    callback: function(value) {
-                        return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                    ticks: {
+                        font: {
+                            size: 12
+                        },
+                        color: '#6b7280',
+                        callback: function(value) {
+                            return 'Rp ' + new Intl.NumberFormat('id-ID').format(value);
+                        }
                     }
-                }
-            }
-        },
-        interaction: {
-            intersect: false,
-            mode: 'index'
-        }
-    }
-});
-
-// Order Status Chart
-const statusCtx = document.getElementById('orderStatusChart').getContext('2d');
-const statusLabels = (statusCounts || []).map(s => s.name);
-const statusData = (statusCounts || []).map(s => s.orders_count || 0);
-const orderStatusChart = new Chart(statusCtx, {
-    type: 'doughnut',
-    data: {
-        labels: statusLabels,
-        datasets: [{
-            data: statusData,
-           backgroundColor: [
-            'rgb(251, 191, 36)',   // Kuning - Menunggu
-            'rgb(34, 197, 94)',    // Hijau - Dikonfirmasi
-            'rgb(59, 130, 246)',   // Biru - Dalam Proses
-            'rgb(59, 130, 246)',   // Biru - Siap
-            'rgb(34, 197, 94)',    // Hijau - Selesai
-            'rgb(239, 68, 68)'     // Merah - Batal
-        ],
-            borderWidth: 0,
-            hoverBorderWidth: 2,
-            hoverBorderColor: '#ffffff'
-        }]
-    },
-    options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-            legend: {
-                position: 'bottom',
-                labels: {
-                    padding: 20,
-                    usePointStyle: true,
-                    font: {
-                        size: 12
-                    },
-                    color: '#374151'
                 }
             },
-            tooltip: {
-                backgroundColor: 'rgba(0, 0, 0, 0.8)',
-                titleColor: '#ffffff',
-                bodyColor: '#ffffff',
-                borderColor: 'rgb(59, 130, 246)',
-                borderWidth: 1,
-                cornerRadius: 8,
-                callbacks: {
-                    label: function(context) {
-                        const label = context.label || '';
-                        const value = context.parsed;
-                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                        const percentage = ((value / total) * 100).toFixed(1);
-                        return `${label}: ${value} (${percentage}%)`;
-                    }
-                }
+            interaction: {
+                intersect: false,
+                mode: 'index'
             }
-        },
-        cutout: '60%'
+        }
+    });
+}
+@endif
+
+// Order Status Chart - Untuk Semua Role
+const statusCtx = document.getElementById('orderStatusChart');
+if (statusCtx) {
+    const statusLabels = statusCounts.map(s => s.name || 'Unknown');
+    const statusData = statusCounts.map(s => s.orders_count || 0);
+    
+    // Cek apakah ada data
+    const hasData = statusData.some(val => val > 0);
+    
+    if (hasData) {
+        const orderStatusChart = new Chart(statusCtx.getContext('2d'), {
+            type: 'doughnut',
+            data: {
+                labels: statusLabels,
+                datasets: [{
+                    data: statusData,
+                    backgroundColor: [
+                        'rgb(251, 191, 36)',  // Kuning - Pending
+                        'rgb(59, 130, 246)',  // Biru - Proses
+                        'rgb(147, 51, 234)',  // Ungu - Cuci
+                        'rgb(34, 197, 94)',   // Hijau - Selesai
+                        'rgb(239, 68, 68)',   // Merah - Batal
+                        'rgb(107, 114, 128)'  // Abu - Lainnya
+                    ],
+                    borderWidth: 0,
+                    hoverBorderWidth: 2,
+                    hoverBorderColor: '#ffffff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            padding: 20,
+                            usePointStyle: true,
+                            font: {
+                                size: 12
+                            },
+                            color: '#374151'
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        titleColor: '#ffffff',
+                        bodyColor: '#ffffff',
+                        borderColor: 'rgb(59, 130, 246)',
+                        borderWidth: 1,
+                        cornerRadius: 8,
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                                return `${label}: ${value} pesanan (${percentage}%)`;
+                            }
+                        }
+                    }
+                },
+                cutout: '60%'
+            }
+        });
+    } else {
+        // Tampilkan pesan jika tidak ada data
+        statusCtx.canvas.parentElement.innerHTML = '<div class="flex items-center justify-center h-full text-gray-500">Belum ada data pesanan</div>';
     }
-});
+}
 
 // Responsive chart resizing
+let resizeTimeout;
 window.addEventListener('resize', function() {
-    salesChart.resize();
-    orderStatusChart.resize();
+    clearTimeout(resizeTimeout);
+    resizeTimeout = setTimeout(function() {
+        @if(auth()->user()->hasRole('super_admin'))
+        if (typeof salesChart !== 'undefined') {
+            salesChart.resize();
+        }
+        @endif
+        if (typeof orderStatusChart !== 'undefined') {
+            orderStatusChart.resize();
+        }
+    }, 250);
 });
 </script>
 @endsection
