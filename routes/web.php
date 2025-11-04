@@ -60,6 +60,7 @@ Route::middleware(['auth'])->group(function () {
         Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
         ->name('orders.updateStatus')
         ->middleware('permission:orders.edit');
+        Route::get('/orders/{order}/receipt', [OrderController::class, 'receipt'])->name('orders.receipt');
     });
 
     // ========================================================================

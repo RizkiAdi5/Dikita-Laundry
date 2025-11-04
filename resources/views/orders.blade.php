@@ -154,19 +154,37 @@
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
-                            <a href="{{ route('orders.show', $order) }}" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
+                            <a href="{{ route('orders.show', $order) }}" 
+                            class="text-blue-600 hover:text-blue-900" 
+                            title="Lihat Detail">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="{{ route('orders.bill', $order) }}" target="_blank" class="text-purple-600 hover:text-purple-900" title="Cetak Bill">
+                            <a href="{{ route('orders.receipt', $order) }}" 
+                            target="_blank" 
+                            class="text-orange-600 hover:text-orange-900" 
+                            title="Print Resi">
+                                <i class="fas fa-receipt"></i>
+                            </a>
+                            <a href="{{ route('orders.bill', $order) }}" 
+                            target="_blank" 
+                            class="text-purple-600 hover:text-purple-900" 
+                            title="Cetak Bill">
                                 <i class="fas fa-file-pdf"></i>
                             </a>
-                            <a href="{{ route('orders.edit', $order) }}" class="text-green-600 hover:text-green-900" title="Edit Pesanan">
+                            <a href="{{ route('orders.edit', $order) }}" 
+                            class="text-green-600 hover:text-green-900" 
+                            title="Edit Pesanan">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus pesanan {{ $order->order_number }}?');" class="inline">
+                            <form action="{{ route('orders.destroy', $order) }}" 
+                                method="POST" 
+                                onsubmit="return confirm('Hapus pesanan {{ $order->order_number }}?');" 
+                                class="inline">
                                 @csrf
                                 @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
+                                <button type="submit" 
+                                        class="text-red-600 hover:text-red-900" 
+                                        title="Hapus">
                                     <i class="fas fa-trash"></i>
                                 </button>
                             </form>

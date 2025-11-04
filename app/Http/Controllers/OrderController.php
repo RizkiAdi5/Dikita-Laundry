@@ -315,7 +315,15 @@ class OrderController extends Controller
             'Content-Disposition' => 'inline; filename="'.$order->order_number.'-bill.pdf"'
         ]);
     }
-
+    /**
+     * Print thermal receipt for 58mm printer
+     */
+    public function receipt(Order $order)
+    {
+        $order->load(['customer', 'items.service', 'status']);
+        return view('orders.receipt', compact('order'));
+    }
+    
     public function destroy(Request $request, Order $order)
     {
         try {
