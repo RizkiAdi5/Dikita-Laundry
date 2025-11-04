@@ -7,15 +7,15 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Symfony\Component\HttpFoundation\Response;
 
-class RoleMiddleware
+class CheckPermission
 {
     /**
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  string  ...$roles
+     * @param  string  $permission
      */
-    public function handle(Request $request, Closure $next, ...$roles): Response
+    public function handle(Request $request, Closure $next, string $permission): Response
     {
         // Check if user is authenticated
         if (!Auth::check()) {
@@ -30,14 +30,9 @@ class RoleMiddleware
             return redirect()->route('login')->with('error', 'Akun Anda tidak aktif. Silakan hubungi administrator.');
         }
 
-        // Super admin can access everything
-        if ($user->isSuperAdmin()) {
-            return $next($request);
-        }
-
-        // Check if user has one of the required roles
-        if (!$user->hasAnyRole($roles)) {
-            abort(403, 'Anda tidak memiliki akses ke halaman ini.');
+        // Check if user can access the permission
+        if (!$user->canAccess($permission)) {
+            abort(403, 'Anda tidak memiliki akses ke fitur ini.');
         }
 
         return $next($request);

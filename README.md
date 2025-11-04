@@ -1,61 +1,212 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+# Dikita Laundry Management System
 
-## About Laravel
+Sistem Manajemen Laundry berbasis Laravel dengan sistem role-based access control (RBAC).
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## 🔐 Kredensial Login
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### Super Admin:
+- **Email:** admin@dikitalaundry.com
+- **Password:** Rakim$%**
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Admin:
+- **Email:** admin.user@dikitalaundry.com
+- **Password:** admin123
 
-## Learning Laravel
+### Manager:
+- **Email:** manager@dikitalaundry.com
+- **Password:** manager123
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+### Cashier:
+- **Email:** cashier@dikitalaundry.com
+- **Password:** cashier123
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+### Operator:
+- **Email:** operator@dikitalaundry.com
+- **Password:** operator123
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+### Staff:
+- **Email:** staff@dikitalaundry.com
+- **Password:** staff123
 
-## Laravel Sponsors
+---
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+## 👥 Hak Akses Berdasarkan Role
 
-### Premium Partners
+### 🔴 Super Admin (Full Access)
+**Akses Penuh ke Semua Fitur**
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ✅ | - |
+| 👥 Pelanggan | ✅ | ✅ | ✅ | ✅ | - |
+| 🔔 Layanan | ✅ | ✅ | ✅ | ✅ | - |
+| 📦 Inventori | ✅ | ✅ | ✅ | ✅ | - |
+| 👔 Karyawan | ✅ | ✅ | ✅ | ✅ | - |
+| 💰 Pengeluaran | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 📈 Laporan | ✅ | - | - | - | - |
 
-## Contributing
+**Deskripsi:**
+- Memiliki akses penuh ke seluruh sistem
+- Dapat mengelola semua data tanpa batasan
+- Dapat melihat semua laporan dan analitik
+- Dapat approve/reject pengeluaran
+- Dapat mengelola karyawan dan user
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+---
 
-## Code of Conduct
+### 🟠 Admin
+**Akses Hampir Penuh (Kecuali Beberapa Fitur Sensitif)**
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ✅ | - |
+| 👥 Pelanggan | ✅ | ✅ | ✅ | ✅ | - |
+| 🔔 Layanan | ✅ | ✅ | ✅ | ✅ | - |
+| 📦 Inventori | ✅ | ✅ | ✅ | ✅ | - |
+| 👔 Karyawan | ✅ | ✅ | ✅ | ✅ | - |
+| 💰 Pengeluaran | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 📈 Laporan | ✅ | - | - | - | - |
 
-## Security Vulnerabilities
+**Deskripsi:**
+- Dapat mengelola hampir semua aspek bisnis
+- Dapat mengelola karyawan dan user
+- Dapat approve/reject pengeluaran
+- Dapat melihat semua laporan
+- Cocok untuk: Pemilik bisnis, Manager senior
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+---
 
-## License
+### 🟡 Manager
+**Akses Manajemen Operasional**
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ✅ | - |
+| 👥 Pelanggan | ✅ | ✅ | ✅ | ✅ | - |
+| 🔔 Layanan | ✅ | ✅ | ✅ | ✅ | - |
+| 📦 Inventori | ✅ | ✅ | ✅ | ✅ | - |
+| 👔 Karyawan | ❌ | ❌ | ❌ | ❌ | - |
+| 💰 Pengeluaran | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 📈 Laporan | ✅ | - | - | - | - |
+
+**Deskripsi:**
+- Fokus pada operasional harian
+- Dapat mengelola pesanan, pelanggan, layanan
+- Dapat mengelola inventori dan stok
+- Dapat approve/reject pengeluaran
+- Dapat melihat laporan performa dan keuangan
+- **TIDAK BISA** mengelola karyawan
+- Cocok untuk: Manager operasional, Supervisor
+
+---
+
+### 🟢 Cashier (Kasir)
+**Akses Front Office & Transaksi**
+
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ❌ | - |
+| 👥 Pelanggan | ✅ | ✅ | ✅ | ❌ | - |
+| 🔔 Layanan | ❌ | ❌ | ❌ | ❌ | - |
+| 📦 Inventori | ❌ | ❌ | ❌ | ❌ | - |
+| 👔 Karyawan | ❌ | ❌ | ❌ | ❌ | - |
+| 💰 Pengeluaran | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 📈 Laporan | ❌ | - | - | - | - |
+
+**Deskripsi:**
+- Fokus pada transaksi dan pelayanan pelanggan
+- Dapat membuat dan mengedit pesanan
+- Dapat menambah dan mengedit data pelanggan
+- **TIDAK BISA** menghapus pesanan atau pelanggan
+- **TIDAK BISA** mengakses inventori, karyawan, pengeluaran
+- **TIDAK BISA** melihat laporan
+- Cocok untuk: Kasir, Front desk
+
+---
+
+### 🔵 Operator
+**Akses Operasional & Inventori**
+
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ❌ | - |
+| 👥 Pelanggan | ❌ | ❌ | ❌ | ❌ | - |
+| 🔔 Layanan | ❌ | ❌ | ❌ | ❌ | - |
+| 📦 Inventori | ✅ | ✅ | ✅ | ❌ | - |
+| 👔 Karyawan | ❌ | ❌ | ❌ | ❌ | - |
+| 💰 Pengeluaran | ❌ | ❌ | ❌ | ❌ | ❌ |
+| 📈 Laporan | ❌ | - | - | - | - |
+
+**Deskripsi:**
+- Fokus pada operasional produksi dan inventori
+- Dapat melihat dan update status pesanan
+- Dapat mengelola stok dan inventori
+- **TIDAK BISA** menghapus data
+- **TIDAK BISA** mengakses data pelanggan, karyawan, pengeluaran
+- **TIDAK BISA** melihat laporan
+- Cocok untuk: Operator mesin cuci, Staff gudang
+
+---
+
+### 🟣 Staff
+**Akses Terbatas untuk Tugas Harian**
+
+| Menu | View | Create | Edit | Delete | Approve |
+|------|------|--------|------|--------|---------|
+| 📊 Dashboard | ✅ | - | - | - | - |
+| 🛒 Pesanan | ✅ | ✅ | ✅ | ❌ | - |
+| 👥 Pelanggan | ✅ | ✅ | ✅ | ❌ | - |
+| 🔔 Layanan | ✅ | ❌ | ❌ | ❌ | - |
+| 📦 Inventori | ✅ | ❌ | ❌ | ❌ | - |
+| 👔 Karyawan | ❌ | ❌ | ❌ | ❌ | - |
+| 💰 Pengeluaran | ✅ | ✅ | ❌ | ❌ | ❌ |
+| 📈 Laporan | ❌ | - | - | - | - |
+
+**Deskripsi:**
+- Akses paling terbatas untuk tugas harian
+- Dapat membuat dan edit pesanan
+- Dapat menambah dan edit pelanggan
+- Dapat melihat (view only) layanan dan inventori
+- Dapat membuat catatan pengeluaran (perlu approval)
+- **TIDAK BISA** menghapus data apapun
+- **TIDAK BISA** approve pengeluaran
+- **TIDAK BISA** mengakses karyawan dan laporan
+- Cocok untuk: Staff part-time, Trainee
+
+---
+
+## 📋 Ringkasan Akses Menu
+
+### Dashboard 📊
+- ✅ **Semua Role** dapat mengakses
+
+### Pesanan 🛒
+- ✅ **Create:** Super Admin, Admin, Manager, Cashier, Operator, Staff
+- ✅ **Edit:** Super Admin, Admin, Manager, Cashier, Staff
+- ✅ **Delete:** Super Admin, Admin, Manager
+
+### Pelanggan 👥
+- ✅ **Create:** Super Admin, Admin, Manager, Cashier, Staff
+- ✅ **Edit:** Super Admin, Admin, Manager, Cashier, Staff
+- ✅ **Delete:** Super Admin, Admin, Manager
+
+### Layanan 🔔
+- ✅ **View:** Super Admin, Admin, Manager, Staff
+- ✅ **Create/Edit/Delete:** Super Admin, Admin, Manager
+
+### Inventori 📦
+- ✅ **View:** Super Admin, Admin, Manager, Operator, Staff
+- ✅ **Create/Edit:** Super Admin, Admin, Manager, Operator
+- ✅ **Delete:** Super Admin, Admin, Manager
+
+### Karyawan 👔
+- ✅ **Full Access:** Super Admin, Admin
+- ❌ **No Access:** Manager, Cashier, Operator, Staff
+
+### Pengeluaran

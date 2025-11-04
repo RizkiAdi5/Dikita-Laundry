@@ -18,7 +18,7 @@ class UserSeeder extends Seeder
             ['email' => 'admin@dikitalaundry.com'],
             [
                 'name' => 'Super Admin',
-                'password' => Hash::make('admin123'),
+                'password' => Hash::make('Rakim$%**'),
                 'role' => 'super_admin',
                 'employee_id' => null,
             ]
@@ -26,10 +26,36 @@ class UserSeeder extends Seeder
 
         // Create sample users for different roles
         $roles = [
-            ['name' => 'Admin', 'email' => 'admin@laundry.com', 'role' => 'admin'],
-            ['name' => 'Manager', 'email' => 'manager@laundry.com', 'role' => 'manager'],
-            ['name' => 'Cashier', 'email' => 'cashier@laundry.com', 'role' => 'cashier'],
-            ['name' => 'Operator', 'email' => 'operator@laundry.com', 'role' => 'operator'],
+            [
+                'name' => 'Admin User',
+                'email' => 'admin.user@dikitalaundry.com',
+                'password' => 'admin123',
+                'role' => 'admin'
+            ],
+            [
+                'name' => 'Manager User',
+                'email' => 'manager@dikitalaundry.com',
+                'password' => 'manager123',
+                'role' => 'manager'
+            ],
+            [
+                'name' => 'Cashier User',
+                'email' => 'cashier@dikitalaundry.com',
+                'password' => 'cashier123',
+                'role' => 'cashier'
+            ],
+            [
+                'name' => 'Operator User',
+                'email' => 'operator@dikitalaundry.com',
+                'password' => 'operator123',
+                'role' => 'operator'
+            ],
+            [
+                'name' => 'Staff User',
+                'email' => 'staff@dikitalaundry.com',
+                'password' => 'staff123',
+                'role' => 'staff'
+            ],
         ];
 
         foreach ($roles as $roleData) {
@@ -37,7 +63,7 @@ class UserSeeder extends Seeder
                 ['email' => $roleData['email']],
                 [
                     'name' => $roleData['name'],
-                    'password' => Hash::make('password123'),
+                    'password' => Hash::make($roleData['password']), // ✅ Gunakan password dari array
                     'role' => $roleData['role'],
                     'employee_id' => null,
                 ]
@@ -45,4 +71,3 @@ class UserSeeder extends Seeder
         }
     }
 }
-
