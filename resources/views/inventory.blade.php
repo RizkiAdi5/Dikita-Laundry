@@ -65,13 +65,15 @@
         </div>
         <select name="category" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <option value="">Semua Kategori</option>
-            <option value="detergent" {{ request('category')=='detergent' ? 'selected' : '' }}>Detergent</option>
-            <option value="fabric_softener" {{ request('category')=='fabric_softener' ? 'selected' : '' }}>Fabric Softener</option>
-            <option value="bleach" {{ request('category')=='bleach' ? 'selected' : '' }}>Bleach</option>
-            <option value="plastic_bag" {{ request('category')=='plastic_bag' ? 'selected' : '' }}>Plastic Bag</option>
-            <option value="hanger" {{ request('category')=='hanger' ? 'selected' : '' }}>Hanger</option>
-            <option value="equipment" {{ request('category')=='equipment' ? 'selected' : '' }}>Equipment</option>
-            <option value="other" {{ request('category')=='other' ? 'selected' : '' }}>Lainnya</option>
+            <option value="detergen" {{ request('category')=='detergen' ? 'selected' : '' }}>Detergen</option>
+            <option value="pelembut" {{ request('category')=='pelembut' ? 'selected' : '' }}>Pelembut</option>
+            <option value="pemutih" {{ request('category')=='pemutih' ? 'selected' : '' }}>Pemutih</option>
+            <option value="plastik" {{ request('category')=='plastik' ? 'selected' : '' }}>Plastik</option>
+            <option value="gantungan" {{ request('category')=='gantungan' ? 'selected' : '' }}>Gantungan</option>
+            <option value="peralatan" {{ request('category')=='peralatan' ? 'selected' : '' }}>Peralatan</option>
+            <option value="parfum" {{ request('category')=='parfum' ? 'selected' : '' }}>Parfum</option>
+            <option value="pembersih_noda" {{ request('category')=='pembersih_noda' ? 'selected' : '' }}>Pembersih Noda</option>
+            <option value="lainnya" {{ request('category')=='lainnya' ? 'selected' : '' }}>Lainnya</option>
         </select>
         <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <option value="">Semua Status</option>
