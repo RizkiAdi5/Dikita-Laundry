@@ -13,58 +13,40 @@ class OrderStatusSeeder extends Seeder
      */
     public function run(): void
     {
-        $statuses = [
+       $statuses = [
             [
-                'name' => 'Pending',
-                'color' => '#ffc107',
+                'name' => 'Menunggu',
+                'color' => '#fbbf24', // Kuning (match dengan chart: rgb(251, 191, 36))
                 'description' => 'Pesanan baru, menunggu konfirmasi',
                 'sort_order' => 1,
             ],
             [
-                'name' => 'Confirmed',
-                'color' => '#17a2b8',
+                'name' => 'Dikonfirmasi',
+                'color' => '#22c55e', // Hijau (match dengan chart: rgb(34, 197, 94))
                 'description' => 'Pesanan dikonfirmasi dan siap diproses',
                 'sort_order' => 2,
             ],
             [
-                'name' => 'In Progress',
-                'color' => '#007bff',
+                'name' => 'Dalam Proses',
+                'color' => '#3b82f6', // Biru (match dengan chart: rgb(59, 130, 246))
                 'description' => 'Pesanan sedang diproses',
                 'sort_order' => 3,
             ],
             [
-                'name' => 'Washing',
-                'color' => '#28a745',
-                'description' => 'Pesanan sedang dicuci',
-                'sort_order' => 4,
-            ],
-            [
-                'name' => 'Drying',
-                'color' => '#fd7e14',
-                'description' => 'Pesanan sedang dikeringkan',
-                'sort_order' => 5,
-            ],
-            [
-                'name' => 'Ironing',
-                'color' => '#6f42c1',
-                'description' => 'Pesanan sedang disetrika',
-                'sort_order' => 6,
-            ],
-            [
-                'name' => 'Ready',
-                'color' => '#20c997',
+                'name' => 'Siap',
+                'color' => '#3b82f6', // Biru (sama dengan Dalam Proses)
                 'description' => 'Pesanan siap diambil',
                 'sort_order' => 7,
             ],
             [
-                'name' => 'Delivered',
-                'color' => '#198754',
+                'name' => 'Selesai',
+                'color' => '#22c55e', // Hijau (sama dengan Dikonfirmasi)
                 'description' => 'Pesanan telah dikirim/diambil',
                 'sort_order' => 8,
             ],
             [
-                'name' => 'Cancelled',
-                'color' => '#dc3545',
+                'name' => 'Batal',
+                'color' => '#ef4444', // Merah (match dengan chart: rgb(239, 68, 68))
                 'description' => 'Pesanan dibatalkan',
                 'sort_order' => 9,
             ],

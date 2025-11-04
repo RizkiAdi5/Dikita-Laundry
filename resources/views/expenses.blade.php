@@ -30,7 +30,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Menunggu Persetujuan</p>
                 <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['pending_amount']) }}</p>
-                <p class="text-sm text-yellow-600">Perlu review</p>
             </div>
         </div>
     </div>
@@ -43,7 +42,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Terlambat Bayar</p>
                 <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['overdue_amount']) }}</p>
-                <p class="text-sm text-orange-600">Perlu perhatian</p>
             </div>
         </div>
     </div>
@@ -56,7 +54,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Bulan Lalu</p>
                 <p class="text-2xl font-bold text-gray-900">Rp {{ number_format($stats['total_last_month']) }}</p>
-                <p class="text-sm text-green-600">Sebagai perbandingan</p>
             </div>
         </div>
     </div>

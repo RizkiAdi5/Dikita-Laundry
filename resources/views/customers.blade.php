@@ -15,7 +15,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Pelanggan</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['total']) }}</p>
-                <p class="text-sm text-green-600">+12% dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -28,7 +27,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Pelanggan Aktif</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['active']) }}</p>
-                <p class="text-sm text-green-600">+8% dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -41,7 +39,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Member VIP</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['vip']) }}</p>
-                <p class="text-sm text-green-600">+5% dari bulan lalu</p>
             </div>
         </div>
     </div>
@@ -54,7 +51,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Rata-rata Rating</p>
                 <p class="text-2xl font-bold text-gray-900">{{ $stats['avg_rating'] }}</p>
-                <p class="text-sm text-green-600">+0.2 dari bulan lalu</p>
             </div>
         </div>
     </div>

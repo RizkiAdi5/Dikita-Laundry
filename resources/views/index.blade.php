@@ -117,7 +117,7 @@
                     <td class="px-6 py-4 whitespace-nowrap">
                         <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $ro->status->name ?? '-' }}</span>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->created_at->diffForHumans() }}</td>
+                   <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $ro->created_at->format('d/m/Y H:i') }}</td>
                 </tr>
                 @empty
                 <tr>
@@ -242,12 +242,14 @@ const orderStatusChart = new Chart(statusCtx, {
         labels: statusLabels,
         datasets: [{
             data: statusData,
-            backgroundColor: [
-                'rgb(34, 197, 94)',
-                'rgb(59, 130, 246)',
-                'rgb(251, 191, 36)',
-                'rgb(239, 68, 68)'
-            ],
+           backgroundColor: [
+    'rgb(251, 191, 36)',   // Kuning - Menunggu
+    'rgb(34, 197, 94)',    // Hijau - Dikonfirmasi
+    'rgb(59, 130, 246)',   // Biru - Dalam Proses
+    'rgb(59, 130, 246)',   // Biru - Siap
+    'rgb(34, 197, 94)',    // Hijau - Selesai
+    'rgb(239, 68, 68)'     // Merah - Batal
+],
             borderWidth: 0,
             hoverBorderWidth: 2,
             hoverBorderColor: '#ffffff'

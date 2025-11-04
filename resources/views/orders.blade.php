@@ -14,8 +14,7 @@
             </div>
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Total Pesanan Hari Ini</p>
-                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['today'] ?? 0) }}</p>
-                <p class="text-sm text-green-600">+5 dari kemarin</p>
+                <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['today'] ?? 0) }}</p>                
             </div>
         </div>
     </div>
@@ -28,7 +27,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Dalam Proses</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['in_progress'] ?? 0) }}</p>
-                <p class="text-sm text-yellow-600">Rata-rata 2.3 jam</p>
             </div>
         </div>
     </div>
@@ -41,7 +39,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Selesai Hari Ini</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['completed_today'] ?? 0) }}</p>
-                <p class="text-sm text-green-600">65% completion rate</p>
             </div>
         </div>
     </div>
@@ -54,7 +51,6 @@
             <div class="ml-4">
                 <p class="text-sm font-medium text-gray-600">Terlambat</p>
                 <p class="text-2xl font-bold text-gray-900">{{ number_format($stats['delayed'] ?? 0) }}</p>
-                <p class="text-sm text-red-600">Perlu perhatian</p>
             </div>
         </div>
     </div>
