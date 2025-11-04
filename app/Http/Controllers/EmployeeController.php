@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Employee;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -60,6 +61,83 @@ class EmployeeController extends Controller
     }
 
     /**
+     * Get linked user account info for an employee
+     */
+    public function getAccount(Employee $employee)
+    {
+        $user = User::where('employee_id', $employee->id)->first();
+
+        return response()->json([
+            'success' => true,
+            'data' => $user ? [
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'role' => $user->role,
+            ] : null
+        ]);
+    }
+
+    /**
+     * Assign or update user account for an employee, including role and password
+     */
+    public function assignAccount(Request $request, Employee $employee)
+    {
+        $user = User::where('employee_id', $employee->id)->first();
+
+        $rules = [
+            'email' => 'required|email|max:255' . ($user ? '|unique:users,email,' . $user->id : '|unique:users,email'),
+            'role' => 'required|in:super_admin,admin,manager,cashier,operator,staff',
+            'password' => 'nullable|min:8|confirmed',
+        ];
+
+        $validator = Validator::make($request->all(), $rules);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors()
+            ], 422);
+        }
+
+        try {
+            if (!$user) {
+                $user = new User();
+                $user->name = $employee->name;
+                $user->employee_id = $employee->id;
+            }
+
+            $user->email = $request->email;
+            $user->role = $request->role;
+            // is_active is not defined on users table; skip toggling active state
+
+            if ($request->filled('password')) {
+                // 'password' field cast will hash automatically
+                $user->password = $request->password;
+            }
+
+            $user->save();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Akun login karyawan berhasil disimpan',
+                'data' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'role' => $user->role,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menyimpan akun',
+                'error' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
      * Show the form for creating a new resource.
      */
     public function create()
@@ -72,7 +150,8 @@ class EmployeeController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(), [
+        // Base rules for employee creation
+        $rules = [
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:employees,email|max:255',
             'phone' => 'required|string|unique:employees,phone|max:20',
@@ -84,8 +163,18 @@ class EmployeeController extends Controller
             'gender' => 'nullable|in:male,female',
             'birth_date' => 'nullable|date|before:today',
             'is_active' => 'boolean',
-            'notes' => 'nullable|string'
-        ]);
+            'notes' => 'nullable|string',
+        ];
+
+        // Optional: create linked login account during employee creation
+        if ($request->boolean('create_login')) {
+            // Ensure employee email also unique in users when creating login
+            $rules['email'] = 'required|email|max:255|unique:employees,email|unique:users,email';
+            $rules['login_role'] = 'required|in:super_admin,admin,manager,cashier,operator,staff';
+            $rules['login_password'] = 'required|string|min:8|confirmed';
+        }
+
+        $validator = Validator::make($request->all(), $rules);
 
         if ($validator->fails()) {
             return response()->json([
@@ -97,6 +186,17 @@ class EmployeeController extends Controller
 
         try {
             $employee = Employee::create($request->all());
+
+            // Create linked user login if requested
+            if ($request->boolean('create_login')) {
+                User::create([
+                    'name' => $employee->name,
+                    'email' => $request->input('email'),
+                    'role' => $request->input('login_role', 'cashier'),
+                    'password' => $request->input('login_password'), // hashed by casts
+                    'employee_id' => $employee->id,
+                ]);
+            }
 
             return response()->json([
                 'success' => true,
@@ -255,4 +355,4 @@ class EmployeeController extends Controller
             ], 500);
         }
     }
-} 
+}

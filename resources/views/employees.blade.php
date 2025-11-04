@@ -144,6 +144,9 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $employee->hire_date->format('d M Y') }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
+                            <button onclick="manageAccess({{ $employee->id }})" class="text-indigo-600 hover:text-indigo-900" title="Kelola Akses">
+                                <i class="fas fa-key"></i>
+                            </button>
                             <button onclick="viewEmployee({{ $employee->id }})" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
                                 <i class="fas fa-eye"></i>
                             </button>
@@ -239,10 +242,84 @@
     @endif
 </div>
 
+<style>
+/* Sembunyikan scrollbar namun tetap bisa scroll */
+.no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+.no-scrollbar::-webkit-scrollbar { display: none; }
+</style>
+<!-- Access Management Modal -->
+<div id="accessModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9997]">
+    <div class="flex items-center justify-center min-h-screen p-4">
+        <div class="bg-white rounded-lg shadow-xl max-w-xl w-full transform transition-all duration-300 ease-in-out">
+            <div class="flex items-center justify-between p-6 border-b">
+                <h3 class="text-lg font-semibold text-gray-900">Kelola Akses Login Karyawan</h3>
+                <button onclick="closeAccessModal()" class="text-gray-400 hover:text-gray-600">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <form id="accessForm" class="p-6">
+                <meta name="csrf-token" content="{{ csrf_token() }}">
+                <div class="grid grid-cols-1 gap-6">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email Akun *</label>
+                        <input type="email" name="email" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <div class="text-red-500 text-xs mt-1 hidden" id="email_account-error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Role Login *</label>
+                        <select name="role" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Pilih Role</option>
+                            <option value="super_admin">Super Admin</option>
+                            <option value="admin">Admin</option>
+                            <option value="manager">Manager</option>
+                            <option value="cashier">Kasir</option>
+                            <option value="operator">Operator</option>
+                            <option value="staff">Staff</option>
+                        </select>
+                        <div class="text-red-500 text-xs mt-1 hidden" id="role_account-error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Password Baru (opsional)</label>
+                        <div class="relative">
+                            <input type="password" id="access_password" name="password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                            <button type="button" onclick="togglePasswordVisibility('access_password', 'toggle_icon_access')" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700" aria-label="Toggle password">
+                                <i id="toggle_icon_access" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="text-red-500 text-xs mt-1 hidden" id="password-error"></div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password</label>
+                        <div class="relative">
+                            <input type="password" id="access_password_confirmation" name="password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                            <button type="button" onclick="togglePasswordVisibility('access_password_confirmation', 'toggle_icon_access_confirm')" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700" aria-label="Toggle confirm">
+                                <i id="toggle_icon_access_confirm" class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                    </div>
+                    
+                </div>
+                <div class="flex justify-end space-x-3 mt-6">
+                    <button type="button" onclick="closeAccessModal()" class="px-4 py-2 text-gray-700 bg-gray-200 rounded-lg hover:bg-gray-300 transition-colors">
+                        Batal
+                    </button>
+                    <button type="submit" id="accessSubmitBtn" class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <span id="accessSubmitText">Simpan</span>
+                        <span id="accessSubmitLoading" class="hidden">
+                            <i class="fas fa-spinner fa-spin mr-2"></i>
+                            Menyimpan...
+                        </span>
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+ </div>
+
 <!-- Create Employee Modal -->
 <div id="createModal" class="fixed inset-0 bg-gray-600 bg-opacity-50 hidden z-[9997]">
     <div class="flex items-center justify-center min-h-screen p-4">
-        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full transform transition-all duration-300 ease-in-out">
+        <div class="bg-white rounded-lg shadow-xl max-w-2xl w-full transform transition-all duration-300 ease-in-out max-h-[85vh] overflow-y-auto no-scrollbar">
             <div class="flex items-center justify-between p-6 border-b">
                 <h3 class="text-lg font-semibold text-gray-900">Tambah Karyawan Baru</h3>
                 <button onclick="closeCreateModal()" class="text-gray-400 hover:text-gray-600">
@@ -320,6 +397,50 @@
                     <div class="flex items-center">
                         <input type="checkbox" name="is_active" value="1" checked class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
                         <label class="ml-2 block text-sm text-gray-900">Karyawan Aktif</label>
+                    </div>
+                </div>
+                <!-- Akun Login (Opsional) -->
+                <div class="mt-6">
+                    <div class="flex items-center">
+                        <input type="checkbox" id="createLoginCheckbox" name="create_login" value="1" class="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded">
+                        <label for="createLoginCheckbox" class="ml-2 block text-sm text-gray-900">Buat akun login untuk karyawan ini</label>
+                    </div>
+                    <div id="loginFields" class="mt-4 hidden">
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Role Akun *</label>
+                                <select name="login_role" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                    <option value="">Pilih Role</option>
+                                    <option value="super_admin">Super Admin</option>
+                                    <option value="admin">Admin</option>
+                                    <option value="manager">Manager</option>
+                                    <option value="cashier">Kasir</option>
+                                    <option value="operator">Operator</option>
+                                    <option value="staff">Staff</option>
+                                </select>
+                                <div class="text-red-500 text-xs mt-1 hidden" id="login_role-error"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Password Akun *</label>
+                                <div class="relative">
+                                    <input type="password" id="login_password" name="login_password" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility('login_password', 'toggle_icon_login')" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700" aria-label="Toggle password">
+                                        <i id="toggle_icon_login" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                                <div class="text-red-500 text-xs mt-1 hidden" id="login_password-error"></div>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Konfirmasi Password *</label>
+                                <div class="relative">
+                                    <input type="password" id="login_password_confirmation" name="login_password_confirmation" class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10">
+                                    <button type="button" onclick="togglePasswordVisibility('login_password_confirmation', 'toggle_icon_login_confirm')" class="absolute inset-y-0 right-0 px-3 text-gray-500 hover:text-gray-700" aria-label="Toggle confirm">
+                                        <i id="toggle_icon_login_confirm" class="fas fa-eye"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="text-xs text-gray-500 mt-2">Email karyawan di atas akan digunakan sebagai email login.</p>
                     </div>
                 </div>
                 <div class="flex justify-end space-x-3 mt-6">
@@ -400,6 +521,7 @@
 let currentAction = null;
 let currentEmployeeId = null;
 let currentEmployeeName = null;
+let currentAccessEmployeeId = null;
 
 // Toast notification functions
 function showToast(message, type = 'success') {
@@ -458,6 +580,22 @@ function openCreateModal() {
     document.body.style.overflow = 'hidden';
 }
 
+function openAccessModal() {
+    document.getElementById('accessModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeAccessModal() {
+    document.getElementById('accessModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    document.getElementById('accessForm').reset();
+    // clear specific errors
+    ['email_account-error','role_account-error','password-error'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.classList.add('hidden'); el.textContent=''; }
+    });
+}
+
 function closeCreateModal() {
     document.getElementById('createModal').classList.add('hidden');
     document.body.style.overflow = 'auto';
@@ -514,6 +652,26 @@ function editEmployee(id) {
     window.location.href = `{{ url('/employees') }}/${id}/edit`;
 }
 
+function manageAccess(id) {
+    currentAccessEmployeeId = id;
+    openAccessModal();
+    // load account info
+    fetch(`{{ url('/api/employees') }}/${id}/account`, {
+        headers: { 'Accept': 'application/json' }
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.success && data.data) {
+            const form = document.getElementById('accessForm');
+            form.email.value = data.data.email || '';
+            form.role.value = data.data.role || '';
+        } else {
+            // Prefill email from table if available by finding row (optional)
+        }
+    })
+    .catch(() => {});
+}
+
 // Handle confirmation actions
 document.getElementById('confirmActionBtn').addEventListener('click', function() {
     if (currentAction === 'delete') {
@@ -539,6 +697,16 @@ document.getElementById('createForm').addEventListener('submit', function(e) {
     clearErrors();
     
     const formData = new FormData(this);
+    // Normalisasi checkbox create_login dan bersihkan field jika tidak dicentang
+    const createLoginChecked = document.getElementById('createLoginCheckbox')?.checked;
+    if (createLoginChecked) {
+        formData.set('create_login', '1');
+    } else {
+        formData.delete('create_login');
+        formData.delete('login_role');
+        formData.delete('login_password');
+        formData.delete('login_password_confirmation');
+    }
     
     fetch('{{ route("employees.store") }}', {
         method: 'POST',
@@ -577,6 +745,79 @@ document.getElementById('createForm').addEventListener('submit', function(e) {
     })
     .finally(() => {
         // Reset button state
+        submitBtn.disabled = false;
+        submitText.classList.remove('hidden');
+        submitLoading.classList.add('hidden');
+    });
+});
+
+// Helper: toggle tampilkan/sembunyikan password
+function togglePasswordVisibility(inputId, iconId) {
+    const input = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+    if (!input) return;
+    const hidden = input.type === 'password';
+    input.type = hidden ? 'text' : 'password';
+    if (icon) {
+        if (hidden) { icon.classList.remove('fa-eye'); icon.classList.add('fa-eye-slash'); }
+        else { icon.classList.remove('fa-eye-slash'); icon.classList.add('fa-eye'); }
+    }
+}
+
+
+// Tampilkan/sembunyikan blok login ketika checkbox berubah
+const createLoginCheckboxEl = document.getElementById('createLoginCheckbox');
+if (createLoginCheckboxEl) {
+    createLoginCheckboxEl.addEventListener('change', function() {
+        const wrap = document.getElementById('loginFields');
+        if (!wrap) return;
+        if (this.checked) { wrap.classList.remove('hidden'); }
+        else { wrap.classList.add('hidden'); }
+    });
+}
+
+// Submit access management form
+document.getElementById('accessForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const submitBtn = document.getElementById('accessSubmitBtn');
+    const submitText = document.getElementById('accessSubmitText');
+    const submitLoading = document.getElementById('accessSubmitLoading');
+
+    submitBtn.disabled = true;
+    submitText.classList.add('hidden');
+    submitLoading.classList.remove('hidden');
+
+    const formData = new FormData(this);
+
+    fetch(`{{ url('/employees') }}/${currentAccessEmployeeId}/assign-account`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showToast('✅ ' + data.message, 'success');
+            closeAccessModal();
+        } else {
+            if (data.errors) {
+                const emailErr = document.getElementById('email_account-error');
+                const roleErr = document.getElementById('role_account-error');
+                const passErr = document.getElementById('password-error');
+                if (data.errors.email) { emailErr.textContent = data.errors.email[0]; emailErr.classList.remove('hidden'); }
+                if (data.errors.role) { roleErr.textContent = data.errors.role[0]; roleErr.classList.remove('hidden'); }
+                if (data.errors.password) { passErr.textContent = data.errors.password[0]; passErr.classList.remove('hidden'); }
+            }
+            showToast('❌ ' + (data.message || 'Gagal menyimpan akun'), 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showToast('❌ Terjadi kesalahan saat menyimpan akun', 'error');
+    })
+    .finally(() => {
         submitBtn.disabled = false;
         submitText.classList.remove('hidden');
         submitLoading.classList.add('hidden');
@@ -629,11 +870,18 @@ document.getElementById('confirmModal').addEventListener('click', function(e) {
     }
 });
 
+document.getElementById('accessModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeAccessModal();
+    }
+});
+
 // Close modal with Escape key
 document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape') {
         closeCreateModal();
         closeConfirmModal();
+        closeAccessModal();
     }
 });
 
@@ -656,4 +904,4 @@ document.addEventListener('DOMContentLoaded', function() {
     @endif
 });
 </script>
-@endsection 
+@endsection

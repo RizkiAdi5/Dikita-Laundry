@@ -40,6 +40,12 @@ class Employee extends Model
         return null;
     }
 
+    // Relationship ke User (akun login terkait karyawan)
+    public function user()
+    {
+        return $this->hasOne(User::class);
+    }
+
     // Accessor untuk mendapatkan inisial nama
     public function getInitialsAttribute()
     {
@@ -173,4 +179,4 @@ class Employee extends Model
     {
         return 4.5; // Akan diupdate setelah sistem rating dibuat
     }
-} 
+}

@@ -176,6 +176,10 @@ Route::middleware(['auth'])->group(function () {
         Route::get('/api/employees/stats', [EmployeeController::class, 'getStats'])->name('employees.stats');
         Route::get('/api/employees/search', [EmployeeController::class, 'search'])->name('employees.search');
         Route::patch('/api/employees/{employee}/toggle-status', [EmployeeController::class, 'toggleStatus'])->name('employees.toggle-status');
+
+        // Account management for employee
+        Route::get('/api/employees/{employee}/account', [EmployeeController::class, 'getAccount'])->name('employees.account');
+        Route::post('/employees/{employee}/assign-account', [EmployeeController::class, 'assignAccount'])->name('employees.assign-account');
     });
 
     // ========================================================================

@@ -49,6 +49,12 @@ class User extends Authenticatable
         ];
     }
 
+    // Relationship ke Employee
+    public function employee()
+    {
+        return $this->belongsTo(Employee::class);
+    }
+
     // ========================================================================
     // ROLE CHECKING METHODS
     // ========================================================================
