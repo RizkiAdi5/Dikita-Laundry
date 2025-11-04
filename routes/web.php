@@ -57,6 +57,9 @@ Route::middleware(['auth'])->group(function () {
         Route::delete('/orders/{order}', [OrderController::class, 'destroy'])->name('orders.destroy')->middleware('permission:orders.delete');
         Route::get('/orders/{order}/bill', [OrderController::class, 'bill'])->name('orders.bill');
         Route::get('/orders/{order}/invoice', [OrderController::class, 'invoice'])->name('orders.invoice');
+        Route::patch('/orders/{order}/status', [OrderController::class, 'updateStatus'])
+        ->name('orders.updateStatus')
+        ->middleware('permission:orders.edit');
     });
 
     // ========================================================================

@@ -37,14 +37,18 @@ class OrderController extends Controller
             });
         }
 
+        if ($request->filled('date')) {
+            $query->whereDate('created_at', $request->date);
+        }
+
         $orders = $query->paginate(12);
 
         $stats = [
             'today' => Order::whereDate('created_at', today())->count(),
-            'in_progress' => Order::whereHas('status', fn($q) => $q->whereIn('name', ['in_progress','ready']))->count(),
-            'completed_today' => Order::whereHas('status', fn($q) => $q->where('name', 'completed'))
+            'in_progress' => Order::whereHas('status', fn($q) => $q->whereIn('name', ['Dalam Proses','Siap']))->count(),
+            'completed_today' => Order::whereHas('status', fn($q) => $q->where('name', 'Selesai'))
                                       ->whereDate('updated_at', today())->count(),
-            'delayed' => Order::whereHas('status', fn($q) => $q->whereNotIn('name', ['completed']))
+            'delayed' => Order::whereHas('status', fn($q) => $q->whereNotIn('name', ['Selesai', 'Batal']))
                               ->whereNotNull('delivery_date')
                               ->whereDate('delivery_date', '<', today())
                               ->count(),
@@ -52,7 +56,7 @@ class OrderController extends Controller
 
         $customers = Customer::select('id', 'name', 'phone')->orderBy('name')->get();
         $services = Service::active()->orderBy('sort_order')->get(['id','name','price','unit']);
-        $statuses = OrderStatus::orderBy('id')->get(['id','name']);
+        $statuses = OrderStatus::orderBy('sort_order')->get(['id','name','color','description']);
 
         return view('orders', compact('orders','stats','customers','services','statuses'));
     }
@@ -76,6 +80,54 @@ class OrderController extends Controller
         $customers = Customer::select('id', 'name', 'phone')->orderBy('name')->get();
         $services = Service::active()->orderBy('sort_order')->get(['id','name','price','unit']);
         return view('orders.edit', compact('order','customers','services'));
+    }
+
+    /**
+     * Update order status
+     */
+    public function updateStatus(Request $request, Order $order)
+    {
+        $validator = Validator::make($request->all(), [
+            'order_status_id' => 'required|exists:order_statuses,id',
+            'notes' => 'nullable|string|max:500',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $validator->errors(),
+            ], 422);
+        }
+
+        try {
+            $oldStatus = $order->status;
+            $newStatus = OrderStatus::find($request->order_status_id);
+
+            $order->update([
+                'order_status_id' => $request->order_status_id,
+                'notes' => $request->notes ?? $order->notes,
+            ]);
+
+            // Log status change (optional - you can create a separate table for this)
+            // OrderStatusHistory::create([...]);
+
+            return response()->json([
+                'success' => true,
+                'message' => "Status berhasil diubah dari '{$oldStatus->name}' ke '{$newStatus->name}'",
+                'data' => [
+                    'order' => $order->load('status'),
+                    'old_status' => $oldStatus,
+                    'new_status' => $newStatus,
+                ]
+            ]);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat mengubah status',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
 
     public function update(Request $request, Order $order)
@@ -127,7 +179,6 @@ class OrderController extends Controller
                     'notes' => $request->notes,
                 ]);
 
-                // sync items: delete and recreate for simplicity
                 $order->items()->delete();
                 foreach ($request->items as $it) {
                     $service = Service::find($it['service_id']);
@@ -194,9 +245,8 @@ class OrderController extends Controller
                 $tax = (float)($request->tax ?? 0);
                 $total = max(0, $subtotal - $discount + $tax);
 
-                // Ensure at least a default status exists
-                $statusId = optional(OrderStatus::firstWhere('name', 'pending'))?->id
-                    ?? OrderStatus::firstOrCreate(['name' => 'pending'])->id;
+                $statusId = optional(OrderStatus::firstWhere('name', 'Menunggu'))?->id
+                    ?? OrderStatus::firstOrCreate(['name' => 'Menunggu', 'color' => '#fbbf24', 'sort_order' => 1])->id;
 
                 $order = Order::create([
                     'order_number' => $orderNumber,
@@ -225,7 +275,6 @@ class OrderController extends Controller
                     ]);
                 }
 
-                // If any payment provided, create a payment record
                 $paidAmount = (float)($request->paid_amount ?? 0);
                 if ($paidAmount > 0) {
                     Payment::create([
@@ -240,8 +289,6 @@ class OrderController extends Controller
                         'paid_at' => now(),
                     ]);
                 }
-
-                // Removed: no longer sending bill to customer's WhatsApp
 
                 return response()->json([
                     'success' => true,
@@ -269,13 +316,10 @@ class OrderController extends Controller
         ]);
     }
 
-    // Removed sendBill endpoint and WhatsApp integration
-
     public function destroy(Request $request, Order $order)
     {
         try {
             DB::transaction(function() use ($order) {
-                // delete children explicitly to be safe regardless of FK constraints
                 $order->items()->delete();
                 $order->payments()->delete();
                 $order->delete();
@@ -293,5 +337,3 @@ class OrderController extends Controller
         }
     }
 }
-
-

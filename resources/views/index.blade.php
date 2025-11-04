@@ -243,13 +243,13 @@ const orderStatusChart = new Chart(statusCtx, {
         datasets: [{
             data: statusData,
            backgroundColor: [
-    'rgb(251, 191, 36)',   // Kuning - Menunggu
-    'rgb(34, 197, 94)',    // Hijau - Dikonfirmasi
-    'rgb(59, 130, 246)',   // Biru - Dalam Proses
-    'rgb(59, 130, 246)',   // Biru - Siap
-    'rgb(34, 197, 94)',    // Hijau - Selesai
-    'rgb(239, 68, 68)'     // Merah - Batal
-],
+            'rgb(251, 191, 36)',   // Kuning - Menunggu
+            'rgb(34, 197, 94)',    // Hijau - Dikonfirmasi
+            'rgb(59, 130, 246)',   // Biru - Dalam Proses
+            'rgb(59, 130, 246)',   // Biru - Siap
+            'rgb(34, 197, 94)',    // Hijau - Selesai
+            'rgb(239, 68, 68)'     // Merah - Batal
+        ],
             borderWidth: 0,
             hoverBorderWidth: 2,
             hoverBorderColor: '#ffffff'

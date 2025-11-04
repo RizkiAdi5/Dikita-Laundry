@@ -58,22 +58,22 @@
 
 <!-- Filters and Actions -->
 <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-    <div class="flex flex-col sm:flex-row gap-4">
+    <form method="GET" action="{{ route('orders.index') }}" class="flex flex-col sm:flex-row gap-4">
         <div class="relative">
-            <input type="text" placeholder="Cari pesanan..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            <input type="text" name="search" value="{{ request('search') }}" placeholder="Cari pesanan..." class="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
             <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
         </div>
-        <select class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+        <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="this.form.submit()">
             <option value="">Semua Status</option>
-            <option value="pending">Pending</option>
-            <option value="confirmed">Dikonfirmasi</option>
-            <option value="in_progress">Dalam Proses</option>
-            <option value="ready">Siap Diambil</option>
-            <option value="completed">Selesai</option>
+            @foreach($statuses as $status)
+                <option value="{{ $status->name }}" {{ request('status') == $status->name ? 'selected' : '' }}>
+                    {{ $status->name }}
+                </option>
+            @endforeach
         </select>
-        <input type="date" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
-    </div>
-    <a href="{{ route('orders.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+        <input type="date" name="date" value="{{ request('date') }}" class="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent" onchange="this.form.submit()">
+    </form>
+    <a href="{{ route('orders.create') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center">
         <i class="fas fa-plus mr-2"></i>
         Pesanan Baru
     </a>
@@ -110,29 +110,60 @@
                             </div>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $order->items->first()->item_name ?? '-' }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                        {{ $order->items->first()->item_name ?? '-' }}
+                        @if($order->items->count() > 1)
+                            <span class="text-gray-500 text-xs">+{{ $order->items->count() - 1 }} lainnya</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{{ $order->formatted_total }}</td>
                     <td class="px-6 py-4 whitespace-nowrap">
-                        <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full bg-gray-100 text-gray-800">{{ $order->status->name }}</span>
+                        <button 
+                            onclick="openStatusModal({{ $order->id }}, '{{ $order->order_number }}', {{ $order->order_status_id }})"
+                            class="inline-flex items-center px-3 py-1 text-xs font-semibold rounded-full hover:opacity-80 transition-opacity cursor-pointer"
+                            style="background-color: {{ $order->status->color }}20; color: {{ $order->status->color }};"
+                            title="Klik untuk ubah status">
+                            <i class="fas fa-circle text-xs mr-1.5" style="color: {{ $order->status->color }};"></i>
+                            {{ $order->status->name }}
+                        </button>
                     </td>
                     <td class="px-6 py-4 whitespace-nowrap">
                         <div class="flex items-center">
+                            @php
+                                $progress = 0;
+                                switch($order->status->name) {
+                                    case 'Menunggu': $progress = 10; break;
+                                    case 'Dikonfirmasi': $progress = 30; break;
+                                    case 'Dalam Proses': $progress = 60; break;
+                                    case 'Siap': $progress = 85; break;
+                                    case 'Selesai': $progress = 100; break;
+                                    case 'Batal': $progress = 0; break;
+                                    default: $progress = 0;
+                                }
+                                $barColor = $order->status->name == 'Selesai' ? 'bg-green-600' : ($order->status->name == 'Batal' ? 'bg-red-600' : 'bg-blue-600');
+                            @endphp
                             <div class="w-16 bg-gray-200 rounded-full h-2 mr-2">
-                                <div class="bg-blue-600 h-2 rounded-full" style="width: 50%"></div>
+                                <div class="{{ $barColor }} h-2 rounded-full transition-all duration-500" style="width: {{ $progress }}%"></div>
                             </div>
-                            <span class="text-xs text-gray-500">-</span>
+                            <span class="text-xs text-gray-500">{{ $progress }}%</span>
                         </div>
                     </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $order->created_at->format('d M Y') }}</td>
+                    <td class="px-6 py-4 whitespace-nowrap">
+                        <div class="text-sm text-gray-900">{{ $order->created_at->format('d M Y') }}</div>
+                        <div class="text-xs text-gray-500">{{ $order->created_at->format('H:i') }}</div>
+                    </td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div class="flex space-x-2">
                             <a href="{{ route('orders.show', $order) }}" class="text-blue-600 hover:text-blue-900" title="Lihat Detail">
                                 <i class="fas fa-eye"></i>
                             </a>
+                            <a href="{{ route('orders.bill', $order) }}" target="_blank" class="text-purple-600 hover:text-purple-900" title="Cetak Bill">
+                                <i class="fas fa-file-pdf"></i>
+                            </a>
                             <a href="{{ route('orders.edit', $order) }}" class="text-green-600 hover:text-green-900" title="Edit Pesanan">
                                 <i class="fas fa-edit"></i>
                             </a>
-                            <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus pesanan {{ $order->order_number }}?');">
+                            <form action="{{ route('orders.destroy', $order) }}" method="POST" onsubmit="return confirm('Hapus pesanan {{ $order->order_number }}?');" class="inline">
                                 @csrf
                                 @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900" title="Hapus">
@@ -144,7 +175,12 @@
                 </tr>
                 @empty
                 <tr>
-                    <td colspan="8" class="px-6 py-10 text-center text-gray-500">Belum ada pesanan.</td>
+                    <td colspan="8" class="px-6 py-10 text-center">
+                        <div class="flex flex-col items-center justify-center text-gray-500">
+                            <i class="fas fa-inbox text-4xl mb-3 text-gray-300"></i>
+                            <p class="text-sm">Belum ada pesanan.</p>
+                        </div>
+                    </td>
                 </tr>
                 @endforelse
             </tbody>
@@ -152,50 +188,205 @@
     </div>
     
     <!-- Pagination -->
-    <div class="bg-white px-4 py-3 flex items-center justify-between border-t border-gray-200 sm:px-6">
-        <div class="flex-1 flex justify-between sm:hidden">
-            <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Sebelumnya
-            </a>
-            <a href="#" class="ml-3 relative inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50">
-                Selanjutnya
-            </a>
-        </div>
-        <div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
-            <div>
-                <p class="text-sm text-gray-700">
-                    Menampilkan <span class="font-medium">1</span> sampai <span class="font-medium">10</span> dari <span class="font-medium">97</span> hasil
-                </p>
-            </div>
-            <div>
-                <nav class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px" aria-label="Pagination">
-                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-left"></i>
-                    </a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">1</a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">2</a>
-                    <a href="#" class="relative inline-flex items-center px-4 py-2 border border-gray-300 bg-white text-sm font-medium text-gray-700 hover:bg-gray-50">3</a>
-                    <a href="#" class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-gray-300 bg-white text-sm font-medium text-gray-500 hover:bg-gray-50">
-                        <i class="fas fa-chevron-right"></i>
-                    </a>
-                </nav>
-            </div>
-        </div>
+    <div class="bg-white px-4 py-3 border-t border-gray-200">
+        {{ $orders->appends(request()->query())->links() }}
     </div>
 </div>
 
+<!-- Status Update Modal -->
+<div id="statusModal" class="hidden fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full z-50">
+    <div class="relative top-20 mx-auto p-5 border w-full max-w-md shadow-lg rounded-lg bg-white">
+        <div class="flex justify-between items-center mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">
+                <i class="fas fa-sync-alt mr-2 text-blue-600"></i>
+                Update Status Pesanan
+            </h3>
+            <button onclick="closeStatusModal()" class="text-gray-400 hover:text-gray-600 transition-colors">
+                <i class="fas fa-times text-xl"></i>
+            </button>
+        </div>
+
+        <form id="statusUpdateForm" onsubmit="updateOrderStatus(event)">
+            <input type="hidden" id="statusOrderId" name="order_id">
+            
+            <div class="mb-4">
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                    Pesanan: <span id="statusOrderNumber" class="font-bold text-blue-600"></span>
+                </label>
+            </div>
+
+            <div class="mb-4">
+                <label for="statusSelect" class="block text-sm font-medium text-gray-700 mb-2">
+                    Status Baru <span class="text-red-500">*</span>
+                </label>
+                <select id="statusSelect" name="order_status_id" required class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Pilih Status</option>
+                    @foreach($statuses as $status)
+                        <option value="{{ $status->id }}" data-color="{{ $status->color }}">
+                            {{ $status->name }}
+                            @if($status->description)
+                                - {{ $status->description }}
+                            @endif
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="mb-6">
+                <label for="statusNotes" class="block text-sm font-medium text-gray-700 mb-2">
+                    Catatan (Opsional)
+                </label>
+                <textarea 
+                    id="statusNotes" 
+                    name="notes" 
+                    rows="3" 
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+            </div>
+
+            <div class="flex justify-end gap-3">
+                <button 
+                    type="button" 
+                    onclick="closeStatusModal()" 
+                    class="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg hover:bg-gray-300 transition-colors">
+                    <i class="fas fa-times mr-2"></i>
+                    Batal
+                </button>
+                <button 
+                    type="submit" 
+                    id="statusSubmitBtn"
+                    class="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                    <i class="fas fa-check mr-2"></i>
+                    Update Status
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 
 @endsection
 
 @section('scripts')
 <script>
-function openCreateModal(){ document.getElementById('createOrderModal').classList.remove('hidden'); document.body.style.overflow='hidden'; }
-function closeCreateModal(){ document.getElementById('createOrderModal').classList.add('hidden'); document.body.style.overflow='auto'; document.getElementById('orderCreateForm')?.reset(); }
+// ============================================================================
+// STATUS MODAL FUNCTIONS
+// ============================================================================
+let currentOrderId = null;
+
+function openStatusModal(orderId, orderNumber, currentStatusId) {
+    currentOrderId = orderId;
+    document.getElementById('statusOrderId').value = orderId;
+    document.getElementById('statusOrderNumber').textContent = orderNumber;
+    document.getElementById('statusSelect').value = currentStatusId;
+    document.getElementById('statusNotes').value = '';
+    document.getElementById('statusModal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+}
+
+function closeStatusModal() {
+    document.getElementById('statusModal').classList.add('hidden');
+    document.body.style.overflow = 'auto';
+    currentOrderId = null;
+}
+
+function updateOrderStatus(event) {
+    event.preventDefault();
+    
+    const btn = document.getElementById('statusSubmitBtn');
+    const originalHtml = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Memperbarui...';
+    
+    const formData = new FormData(event.target);
+    const orderId = formData.get('order_id');
+    
+    fetch(`/orders/${orderId}/status`, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+            'X-Requested-With': 'XMLHttpRequest',
+            'Accept': 'application/json',
+            'X-HTTP-Method-Override': 'PATCH'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('success', data.message);
+            closeStatusModal();
+            setTimeout(() => location.reload(), 1000);
+        } else {
+            showNotification('error', data.message || 'Gagal mengubah status');
+            btn.disabled = false;
+            btn.innerHTML = originalHtml;
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('error', 'Terjadi kesalahan saat mengubah status');
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+    });
+}
+
+function showNotification(type, message) {
+    const bgColor = type === 'success' ? 'bg-green-500' : 'bg-red-500';
+    const icon = type === 'success' ? 'fa-check-circle' : 'fa-exclamation-circle';
+    
+    const notification = document.createElement('div');
+    notification.className = `fixed top-4 right-4 ${bgColor} text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-3 animate-fade-in`;
+    notification.innerHTML = `
+        <i class="fas ${icon}"></i>
+        <span>${message}</span>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.style.opacity = '0';
+        notification.style.transition = 'opacity 0.3s ease';
+        setTimeout(() => notification.remove(), 300);
+    }, 3000);
+}
+
+// Close modal when clicking outside
+document.getElementById('statusModal')?.addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeStatusModal();
+    }
+});
+
+// Close modal with Escape key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape' && !document.getElementById('statusModal').classList.contains('hidden')) {
+        closeStatusModal();
+    }
+});
+
+// ============================================================================
+// CREATE ORDER MODAL FUNCTIONS (Existing)
+// ============================================================================
+function openCreateModal(){ 
+    const modal = document.getElementById('createOrderModal');
+    if(modal) {
+        modal.classList.remove('hidden'); 
+        document.body.style.overflow='hidden'; 
+    }
+}
+
+function closeCreateModal(){ 
+    const modal = document.getElementById('createOrderModal');
+    if(modal) {
+        modal.classList.add('hidden'); 
+        document.body.style.overflow='auto'; 
+        document.getElementById('orderCreateForm')?.reset(); 
+    }
+}
 
 document.addEventListener('DOMContentLoaded', function(){
   const form = document.getElementById('orderCreateForm');
   if(form){
-    // Dynamic items handling
     const itemsContainer = document.getElementById('itemsContainer');
     const template = document.getElementById('itemRowTemplate');
     const addBtn = document.getElementById('addItemRowBtn');
@@ -259,18 +450,22 @@ document.addEventListener('DOMContentLoaded', function(){
       wireRow(clone);
     }
 
-    addBtn.addEventListener('click', addRow);
-    discountInput.addEventListener('input', recalc);
-    taxInput.addEventListener('input', recalc);
+    if(addBtn) addBtn.addEventListener('click', addRow);
+    if(discountInput) discountInput.addEventListener('input', recalc);
+    if(taxInput) taxInput.addEventListener('input', recalc);
 
     // Initialize with one row
-    addRow();
+    if(itemsContainer && template) addRow();
 
     form.addEventListener('submit', function(e){
       e.preventDefault();
       const btn = document.getElementById('orderSubmitBtn');
+      if(!btn) return;
+      
       const original = btn.innerHTML;
-      btn.disabled=true; btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+      btn.disabled=true; 
+      btn.innerHTML='<i class="fas fa-spinner fa-spin mr-2"></i>Menyimpan...';
+      
       const fd = new FormData(form);
       const body = new FormData();
       body.append('customer_id', fd.get('customer_id'));
@@ -283,7 +478,6 @@ document.addEventListener('DOMContentLoaded', function(){
       if (fd.get('payment_method')) body.append('payment_method', fd.get('payment_method'));
       if (fd.get('paid_amount')) body.append('paid_amount', fd.get('paid_amount'));
 
-      // collect dynamic items
       const rows = itemsContainer.querySelectorAll('.item-row');
       rows.forEach((row, idx) => {
         const serviceId = row.querySelector('.service-select').value;
@@ -300,46 +494,62 @@ document.addEventListener('DOMContentLoaded', function(){
         method: 'POST',
         body,
         credentials: 'same-origin',
-        headers: { 'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 'X-Requested-With': 'XMLHttpRequest', 'Accept':'application/json' }
+        headers: { 
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'), 
+            'X-Requested-With': 'XMLHttpRequest', 
+            'Accept':'application/json' 
+        }
       }).then(r=>r.json()).then(data=>{
-        if(data.success){ closeCreateModal(); location.reload(); }
-        else{ alert(data.message || 'Gagal membuat pesanan'); }
-      }).catch(()=>alert('Gagal membuat pesanan')).finally(()=>{ btn.disabled=false; btn.innerHTML=original; });
+        if(data.success){ 
+            showNotification('success', 'Pesanan berhasil dibuat');
+            closeCreateModal(); 
+            setTimeout(() => location.reload(), 1000);
+        } else { 
+            showNotification('error', data.message || 'Gagal membuat pesanan');
+        }
+      }).catch(()=>{
+        showNotification('error', 'Gagal membuat pesanan');
+      }).finally(()=>{ 
+        btn.disabled=false; 
+        btn.innerHTML=original; 
+      });
     });
   }
 });
-// Update timestamp
+
+// ============================================================================
+// UTILITY FUNCTIONS
+// ============================================================================
 function updateTimestamp() {
     const now = new Date();
     const timeString = now.toLocaleTimeString('id-ID');
-    document.getElementById('lastUpdate').textContent = timeString;
+    const el = document.getElementById('lastUpdate');
+    if(el) el.textContent = timeString;
 }
 
-// Update every 30 seconds
 setInterval(updateTimestamp, 30000);
 updateTimestamp();
+</script>
 
-// Simulate real-time progress updates
-function simulateProgressUpdates() {
-    const progressBars = document.querySelectorAll('.bg-blue-600, .bg-green-600');
-    progressBars.forEach(bar => {
-        const currentWidth = parseInt(bar.style.width);
-        if (currentWidth < 100) {
-            const newWidth = Math.min(100, currentWidth + Math.random() * 5);
-            bar.style.width = newWidth + '%';
-            
-            // Update percentage text
-            const percentageText = bar.parentElement.nextElementSibling;
-            if (percentageText) {
-                percentageText.textContent = Math.round(newWidth) + '%';
-            }
-        }
-    });
+<style>
+@keyframes fade-in {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
-// Update progress every 10 seconds
-setInterval(simulateProgressUpdates, 10000);
+.animate-fade-in {
+    animation: fade-in 0.3s ease;
+}
 
-// Note: action button handlers for .text-blue-600 removed; eye icon now links directly to PDF
-</script>
-@endsection 
+/* Smooth transitions for progress bars */
+.transition-all {
+    transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+}
+</style>
+@endsection
